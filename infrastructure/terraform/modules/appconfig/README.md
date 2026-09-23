@@ -1,0 +1,2 @@
+# AppConfig module
+Provision application/environment/configuration profiles and deployment strategy for validated runtime flags, provider selections, kill switches and limits. Use progressive deployment and rollback alarms. No secret values belong in AppConfig.
