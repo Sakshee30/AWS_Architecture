@@ -1,0 +1,26 @@
+name: Sections 1-30 Integration Contract
+on:
+  pull_request:
+  push:
+    branches: [main]
+permissions: {contents: read}
+jobs:
+  architecture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: "22"}
+      - name: Section 16-30 static architecture checks
+        run: |
+          python tests/architecture/validate_integration_1_15.py
+          for f in tests/architecture/validate_section*.py; do python "$f"; done
+      - name: TypeScript typecheck when root project is available
+        shell: bash
+        run: |
+          if [ -f package.json ] && [ -f tsconfig.json ]; then
+            npm ci
+            npm run typecheck --if-present
+          else
+            echo "Root Sections 1-15 workspace not yet merged into this repository; static integration contract verified."
+          fi
