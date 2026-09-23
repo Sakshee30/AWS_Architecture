@@ -1,6 +1,12 @@
 capabilities:
-  postgres: {rpo_minutes: 5, rto_minutes: 60, recovery: "RDS automated backup + PITR", restore_test: quarterly}
-  s3: {rpo_minutes: 60, rto_minutes: 120, recovery: "versioning/lifecycle; replication only when required", restore_test: quarterly}
-  queues: {rpo_minutes: 5, rto_minutes: 60, recovery: "DLQ + idempotent replay", restore_test: quarterly}
+  postgres: {rpo_minutes: 5, rto_minutes: 60, recovery: "RDS automated backups + PITR", restore_test: quarterly}
+  s3: {rpo_minutes: 60, rto_minutes: 120, recovery: "versioning/lifecycle; replication only when business continuity requires it", restore_test: quarterly}
+  queues: {rpo_minutes: 5, rto_minutes: 60, recovery: "queue/DLQ retention + idempotent replay", restore_test: quarterly}
   configuration: {rpo_minutes: 0, rto_minutes: 30, recovery: "Git + AppConfig version rollback", restore_test: quarterly}
-strategy: "Prefer Multi-AZ; cross-region/active-active only with documented business justification."
+  services: {rpo_minutes: 0, rto_minutes: 30, recovery: "redeploy immutable image digest from Git/IaC", restore_test: quarterly}
+  secrets: {rpo_minutes: 0, rto_minutes: 60, recovery: "documented Secrets Manager recovery/rotation procedure", restore_test: quarterly}
+  region: {rpo_minutes: 60, rto_minutes: 240, recovery: "documented region-failure procedure; cross-region only when justified", restore_test: quarterly}
+strategy: "Prefer Multi-AZ before active-active multi-region. Cross-region copies require documented business-continuity justification."
+evidence:
+  required: true
+  record: [exercise_id, capability, timestamp, owner, achieved_rpo_minutes, achieved_rto_minutes, integrity_check, result, gaps]
