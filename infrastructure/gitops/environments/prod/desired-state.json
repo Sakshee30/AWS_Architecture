@@ -4,11 +4,11 @@
   "infrastructure": {
     "enable_redis": true,
     "enable_msk": true,
-    "enable_opensearch": true,
-    "enable_eks": true,
-    "enable_ecs": false,
+    "enable_opensearch": false,
+    "enable_eks": false,
+    "enable_ecs": true,
     "enable_gpu_nodes": false,
-    "enable_alb": false
+    "enable_alb": true
   },
   "changePolicy": {
     "sourceOfTruth": "git",

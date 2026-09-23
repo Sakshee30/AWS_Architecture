@@ -15,7 +15,11 @@ ENV PORT=8080
 
 RUN apk upgrade --no-cache \
  && addgroup -S app -g 10001 \
- && adduser -S app -G app -u 10001
+ && adduser -S app -G app -u 10001 \
+ && rm -rf /usr/local/lib/node_modules/npm \
+           /usr/local/bin/npm \
+           /usr/local/bin/npx \
+           /root/.npm
 
 WORKDIR /app
 
@@ -23,8 +27,7 @@ COPY --from=build /app/package.json ./package.json
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/node_modules ./node_modules
 
-RUN chown -R 10001:10001 /app \
- && rm -rf /root/.npm
+RUN chown -R 10001:10001 /app
 
 USER 10001:10001
 

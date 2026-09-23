@@ -10,8 +10,10 @@ permissions:
 jobs:
   code-quality:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
@@ -24,16 +26,27 @@ jobs:
             npm install --package-lock=false
           fi
 
+      - name: Maintainable formatting gate
+        run: npm run format:check
+
+      - name: Source hygiene lint gate
+        run: npm run lint
+
       - name: TypeScript typecheck
         run: npm run typecheck
+
       - name: Unit tests
         run: npm run test:unit
+
       - name: Integration tests
         run: npm run test:integration
+
       - name: Contract tests
         run: npm run test:contract
+
       - name: Security tests
         run: npm run test:security
+
       - name: Architecture checks
         run: |
           python tests/architecture/forbidden_imports.py
@@ -43,8 +56,10 @@ jobs:
 
   dependency-policy:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
@@ -65,14 +80,17 @@ jobs:
 
   secrets:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+
       - name: Secret scan
         uses: docker://zricethezav/gitleaks:v8.24.3
         with:
           args: detect --no-git --source=/github/workspace --redact --exit-code=1
+
       - name: Filesystem vulnerability scan
         uses: aquasecurity/trivy-action@v0.36.0
         with:
@@ -84,17 +102,22 @@ jobs:
 
   sast:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: github/codeql-action/init@v3
         with:
           languages: javascript-typescript
+
       - uses: github/codeql-action/analyze@v3
 
   iac-container:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
+
       - name: IaC policy scan
         uses: aquasecurity/trivy-action@v0.36.0
         with:
@@ -103,5 +126,6 @@ jobs:
           format: table
           exit-code: "1"
           severity: "CRITICAL"
+
       - name: Build production API image
         run: docker build -f infrastructure/docker/api.Dockerfile -t pr-api:${GITHUB_SHA} .

@@ -12,6 +12,8 @@
     "build:server": "tsc -p tsconfig.build.json",
     "build:web": "npm run build --workspace @platform/web",
     "build:platform-admin": "npm run build --workspace @platform/platform-admin",
+    "format:check": "node scripts/source-hygiene.mjs format",
+    "lint": "node scripts/source-hygiene.mjs lint",
     "test": "tsx --test tests/**/*.test.mjs tests/**/*.test.ts",
     "test:unit": "tsx --test tests/capability-container.test.ts tests/config-validation.test.ts tests/dependency-policy.test.ts tests/event-schema.test.ts tests/cache-worker-hardening.test.ts",
     "test:integration": "tsx --test tests/*adapter*.test.ts tests/object-storage-search-ai.test.ts tests/postgres-schema.test.mjs",
@@ -26,6 +28,10 @@
     "test:control-plane": "tsx --test tests/platform-control-api.test.ts tests/control-change-machine.test.ts",
     "test:architecture": "python tests/architecture/forbidden_imports.py",
     "test:smoke": "tsx --test tests/config-validation.test.ts tests/platform-control-api.test.ts",
+    "test:api": "npm run test:contract",
+    "test:dast": "node scripts/http-check.mjs dast",
+    "test:load": "node scripts/load-test.mjs",
+    "test:production-health": "node scripts/http-check.mjs production-health",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {

@@ -18,8 +18,10 @@ permissions:
 jobs:
   lock:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
@@ -29,7 +31,7 @@ jobs:
 
       - name: Commit lockfile when dependency metadata changed
         run: |
-          if git diff --quiet -- package-lock.json && [ -f package-lock.json ]; then
+          if [ -z "$(git status --porcelain -- package-lock.json)" ]; then
             echo "package-lock.json is current"
             exit 0
           fi

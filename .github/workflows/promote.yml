@@ -1,4 +1,5 @@
 name: Environment Promotion
+
 on:
   workflow_dispatch:
     inputs:
@@ -18,16 +19,32 @@ on:
       deployment_execution:
         description: Deployment execution/change id
         required: true
+
 permissions:
   contents: read
+
 jobs:
   gate:
     environment: ${{ inputs.environment }}
     runs-on: ubuntu-latest
+
+    env:
+      API_BASE_URL: ${{ vars.API_BASE_URL }}
+      LOAD_BASE_URL: ${{ vars.API_BASE_URL }}
+
     steps:
       - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install workspace
+        run: npm ci
+
       - name: Validate immutable digest
         run: echo "${{ inputs.image_digest }}" | grep -Eq '^sha256:[a-fA-F0-9]{64}$'
+
       - name: Create release manifest
         run: |
           cat > release-manifest.json <<JSON
@@ -41,16 +58,31 @@ jobs:
             "deploymentExecution":"${{ inputs.deployment_execution }}"
           }
           JSON
+
       - name: Promotion smoke gate
-        run: npm run test:smoke --if-present
+        run: npm run test:smoke
+
       - name: Environment-specific verification
         run: |
           case "${{ inputs.environment }}" in
-            dev) npm run test:api --if-present ;;
-            test) npm run test:e2e --if-present; npm run test:dast --if-present; npm run test:performance --if-present ;;
-            staging) npm run test:smoke --if-present; npm run test:load --if-present; npm run test:migration --if-present ;;
-            production) npm run test:production-health --if-present ;;
+            dev)
+              npm run test:api
+              ;;
+            test)
+              npm run test:e2e
+              npm run test:dast
+              npm run test:performance
+              ;;
+            staging)
+              npm run test:smoke
+              npm run test:load
+              npm run test:migration
+              ;;
+            production)
+              npm run test:production-health
+              ;;
           esac
+
       - uses: actions/upload-artifact@v4
         with:
           name: release-evidence-${{ inputs.environment }}
