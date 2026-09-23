@@ -16,14 +16,13 @@ resource "aws_s3_bucket_versioning" "logs" {
  versioning_configuration { status = "Enabled" }
 }
 resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
- bucket = aws_s3_bucket.logs.id
- rule {
+  bucket = aws_s3_bucket.logs.id
+  rule {
     apply_server_side_encryption_by_default {
-  sse_algorithm = var.kms_key_arn == null ? "AES256" : "aws:kms"
-  kms_master_key_id = var.kms_key_arn
- }
-
- }
+      sse_algorithm     = var.kms_key_arn == null ? "AES256" : "aws:kms"
+      kms_master_key_id = var.kms_key_arn
+    }
+  }
 }
 resource "aws_s3_bucket_policy" "cloudtrail" {
  bucket = aws_s3_bucket.logs.id
