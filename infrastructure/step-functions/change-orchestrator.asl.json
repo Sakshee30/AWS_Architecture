@@ -1,0 +1,147 @@
+{
+  "Comment": "Controlled platform change orchestration. Task ARNs are supplied by deployment/IaC, never by the browser.",
+  "StartAt": "ValidateChange",
+  "States": {
+    "ValidateChange": {
+      "Type": "Task",
+      "Resource": "${ValidateChangeArn}",
+      "Next": "ImpactAnalysis",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "FailChange"
+        }
+      ]
+    },
+    "ImpactAnalysis": {
+      "Type": "Task",
+      "Resource": "${ImpactAnalysisArn}",
+      "Next": "ApprovalRequired"
+    },
+    "ApprovalRequired": {
+      "Type": "Choice",
+      "Choices": [
+        {
+          "Variable": "$.requiresApproval",
+          "BooleanEquals": true,
+          "Next": "WaitForApproval"
+        }
+      ],
+      "Default": "ApplyAppConfig"
+    },
+    "WaitForApproval": {
+      "Type": "Task",
+      "Resource": "${WaitForApprovalArn}",
+      "Next": "ApplyAppConfig",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "FailChange"
+        }
+      ]
+    },
+    "ApplyAppConfig": {
+      "Type": "Task",
+      "Resource": "${ApplyAppConfigArn}",
+      "Next": "RunTerraformPlan",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "Rollback"
+        }
+      ]
+    },
+    "RunTerraformPlan": {
+      "Type": "Task",
+      "Resource": "${TerraformPlanArn}",
+      "Next": "ApplyInfrastructure",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "Rollback"
+        }
+      ]
+    },
+    "ApplyInfrastructure": {
+      "Type": "Task",
+      "Resource": "${TerraformApplyArn}",
+      "Next": "DeployApplication",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "Rollback"
+        }
+      ]
+    },
+    "DeployApplication": {
+      "Type": "Task",
+      "Resource": "${DeployApplicationArn}",
+      "Next": "SmokeTests",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "Rollback"
+        }
+      ]
+    },
+    "SmokeTests": {
+      "Type": "Task",
+      "Resource": "${SmokeTestsArn}",
+      "Next": "CloudWatchHealthGate",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "Rollback"
+        }
+      ]
+    },
+    "CloudWatchHealthGate": {
+      "Type": "Task",
+      "Resource": "${HealthGateArn}",
+      "Next": "CompleteChange",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "Next": "Rollback"
+        }
+      ]
+    },
+    "Rollback": {
+      "Type": "Task",
+      "Resource": "${RollbackArn}",
+      "Next": "VerifyRollback"
+    },
+    "VerifyRollback": {
+      "Type": "Task",
+      "Resource": "${HealthGateArn}",
+      "Next": "RolledBack"
+    },
+    "CompleteChange": {
+      "Type": "Succeed"
+    },
+    "RolledBack": {
+      "Type": "Fail",
+      "Error": "ChangeRolledBack"
+    },
+    "FailChange": {
+      "Type": "Fail",
+      "Error": "ChangeValidationFailed"
+    }
+  }
+}

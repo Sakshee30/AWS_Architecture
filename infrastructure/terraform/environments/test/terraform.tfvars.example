@@ -1,12 +1,12 @@
 application_name = "platform"
 owner            = "platform-team"
 cost_center      = "engineering"
-vpc_cidr         = "10.10.0.0/16"
+vpc_cidr         = "10.20.0.0/16"
 azs              = ["ap-south-1a", "ap-south-1b"]
 public_subnet_cidrs        = ["10.10.0.0/24", "10.10.1.0/24"]
 private_app_subnet_cidrs   = ["10.10.10.0/24", "10.10.11.0/24"]
 isolated_data_subnet_cidrs = ["10.10.20.0/24", "10.10.21.0/24"]
-enable_redis      = false
+enable_redis      = true
 enable_msk        = false
 enable_opensearch = false
 enable_eks        = false

@@ -8,7 +8,7 @@ provider "aws" {
 locals {
   tags = {
     Application = var.application_name
-    Environment = "dev"
+    Environment = "staging"
     Service     = "platform"
     Owner       = var.owner
     CostCenter  = var.cost_center
@@ -19,7 +19,7 @@ module "platform" {
   source = "../../modules/platform-environment"
 
   application_name           = var.application_name
-  environment                = "dev"
+  environment                = "staging"
   vpc_cidr                   = var.vpc_cidr
   azs                        = var.azs
   public_subnet_cidrs        = var.public_subnet_cidrs

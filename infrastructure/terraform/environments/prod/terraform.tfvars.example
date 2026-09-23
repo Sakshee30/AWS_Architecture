@@ -1,0 +1,16 @@
+application_name = "platform"
+owner            = "platform-team"
+cost_center      = "engineering"
+vpc_cidr         = "10.40.0.0/16"
+azs              = ["ap-south-1a", "ap-south-1b"]
+public_subnet_cidrs        = ["10.40.0.0/24", "10.40.1.0/24"]
+private_app_subnet_cidrs   = ["10.40.10.0/24", "10.40.11.0/24"]
+isolated_data_subnet_cidrs = ["10.40.20.0/24", "10.40.21.0/24"]
+enable_redis      = true
+enable_msk        = true
+enable_opensearch = true
+enable_eks        = true
+enable_ecs        = false
+enable_gpu_nodes  = false
+enable_alb        = true
+container_image   = "REPLACE_WITH_ECR_REPOSITORY@sha256:REPLACE_WITH_64_HEX_DIGEST"
