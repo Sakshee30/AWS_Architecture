@@ -10,10 +10,13 @@ permissions:
 jobs:
   architecture:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
+
       - name: Enforce dependency direction
         run: python tests/architecture/forbidden_imports.py
+
       - name: Validate architecture sections
         run: |
           for file in tests/architecture/validate_section*.py; do
@@ -22,6 +25,7 @@ jobs:
 
   test-matrix:
     runs-on: ubuntu-latest
+
     strategy:
       fail-fast: false
       matrix:
@@ -40,17 +44,26 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
 
       - name: Install workspace
-        run: |
-          if [ -f package-lock.json ]; then
-            npm ci
-          else
-            npm install --package-lock=false
-          fi
+        run: npm ci
 
       - name: Execute mandatory quality gate
-        run: npm run "test:${{ matrix.gate }}"
+        run: |
+          case "${{ matrix.gate }}" in
+            unit) npm run test:unit ;;
+            integration) npm run test:integration ;;
+            contract) npm run test:contract ;;
+            e2e) npm run test:e2e ;;
+            security) npm run test:security ;;
+            performance) npm run test:performance ;;
+            resilience) npm run test:resilience ;;
+            chaos) npm run test:chaos ;;
+            backup-restore) npm run test:backup-restore ;;
+            migration) npm run test:migration ;;
+            control-plane) npm run test:control-plane ;;
+          esac

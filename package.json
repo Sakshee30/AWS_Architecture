@@ -15,7 +15,7 @@
     "format:check": "node scripts/source-hygiene.mjs format",
     "lint": "node scripts/source-hygiene.mjs lint",
     "test": "tsx --test tests/**/*.test.mjs tests/**/*.test.ts",
-    "test:unit": "tsx --test tests/capability-container.test.ts tests/config-validation.test.ts tests/dependency-policy.test.ts tests/event-schema.test.ts tests/cache-worker-hardening.test.ts",
+    "test:unit": "tsx --test tests/capability-container.test.ts tests/config-validation.test.ts tests/dependency-policy.test.ts tests/event-schema.test.ts tests/cache-worker-hardening.test.ts tests/core-services.test.ts",
     "test:integration": "tsx --test tests/*adapter*.test.ts tests/object-storage-search-ai.test.ts tests/postgres-schema.test.mjs",
     "test:contract": "tsx --test tests/provider-contracts.test.mjs tests/platform-control-api.test.ts",
     "test:e2e": "tsx --test tests/switch-workflows.test.ts tests/web-session.test.ts",
