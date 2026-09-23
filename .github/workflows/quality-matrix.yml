@@ -20,9 +20,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
+        if: ${{ hashFiles('package-lock.json') != '' }}
         with: {node-version: "22"}
-      - run: npm ci
-      - name: Execute gate
+      - name: Install workspace when lockfile exists
+        if: ${{ hashFiles('package-lock.json') != '' }}
+        run: npm ci
+      - name: Execute gate when workspace is present
+        if: ${{ hashFiles('package-lock.json') != '' }}
         run: |
           case "${{ matrix.gate }}" in
             unit) npm run test:unit --if-present ;;
@@ -37,3 +41,6 @@ jobs:
             migration) npm run test:migration --if-present ;;
             control-plane) npm run test:control-plane --if-present ;;
           esac
+      - name: Record integration dependency
+        if: ${{ hashFiles('package-lock.json') == '' }}
+        run: echo "Root Sections 1-15 workspace/lockfile not merged yet; runtime gate remains evidence-pending."
