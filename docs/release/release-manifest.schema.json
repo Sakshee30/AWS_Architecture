@@ -1,0 +1,40 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": [
+    "version",
+    "gitCommit",
+    "imageDigest",
+    "sbom",
+    "configVersion",
+    "migrationVersion",
+    "deploymentExecution"
+  ],
+  "properties": {
+    "version": {
+      "type": "string"
+    },
+    "gitCommit": {
+      "type": "string"
+    },
+    "imageDigest": {
+      "type": "string",
+      "pattern": "^sha256:[a-fA-F0-9]{64}$"
+    },
+    "sbom": {
+      "type": "string"
+    },
+    "configVersion": {
+      "type": [
+        "integer",
+        "string"
+      ]
+    },
+    "migrationVersion": {
+      "type": "string"
+    },
+    "deploymentExecution": {
+      "type": "string"
+    }
+  }
+}
