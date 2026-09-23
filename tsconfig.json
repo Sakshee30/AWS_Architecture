@@ -30,7 +30,6 @@
     "apps/**/*.tsx",
     "services/**/*.ts",
     "packages/**/*.ts",
-    "adapters/**/*.ts",
-    "tests/**/*.ts"
+    "adapters/**/*.ts"
   ]
 }

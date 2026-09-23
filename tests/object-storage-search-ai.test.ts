@@ -41,5 +41,5 @@ test('RAG blocks cross-workspace retrieved context inside the same tenant',async
 test('tenant-root RAG cannot consume workspace-scoped retrieved context',async()=>{await assert.rejects(()=>buildAuthorizedRagPrompt({tenantId:'t1',question:'q',retrieve:async()=>[{content:'secret',tenantId:'t1',workspaceId:'w1'}]}),/CROSS_TENANT_RAG_CONTEXT_BLOCKED/)});
 
 test('shadow search returns active results and observes comparison',async()=>{
-  const make=(id:string,ms:number):SearchPort<Record<string,never>>=>({search:async()=>({hits:[{id,score:1,source:{}}],tookMs:ms}),health:healthy});let observed=false;const adapter=new ShadowSearchAdapter(make('a',2),make('a',3),o=>{observed=o.overlap===1});const result=await adapter.search({text:'x',tenantId:'t1'});assert.equal(result.hits[0]?.id,'a');assert.equal(observed,true);
+  const make=(id:string,ms:number):SearchPort=>({search:async<T=unknown>()=>({hits:[{id,score:1,source:{} as T}],tookMs:ms}),health:healthy});let observed=false;const adapter=new ShadowSearchAdapter(make('a',2),make('a',3),o=>{observed=o.overlap===1});const result=await adapter.search({text:'x',tenantId:'t1'});assert.equal(result.hits[0]?.id,'a');assert.equal(observed,true);
 });
