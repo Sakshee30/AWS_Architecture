@@ -1,5 +1,6 @@
 import Fastify from 'fastify';
 import { createPostgresPool } from '../../../adapters/postgres/src/pool.js';
+import { AwsOperationsCollector } from '../../../services/operations/src/index.js';
 import {
   planSwitch,
   WorkflowPreconditionError,
@@ -155,9 +156,28 @@ app.get('/health', async (_request, reply) => {
 });
 
 app.get('/v1/control/overview', async () => {
-  const [configVersion, overview] = await Promise.all([
+  const [
+    configVersion,
+    overview,
+    health,
+    observability,
+    security,
+    infrastructure,
+    costs,
+    backupDr,
+    drift,
+    deployments,
+  ] = await Promise.all([
     store.getConfigVersion(),
     store.getPage('overview'),
+    store.getPage('health'),
+    store.getPage('observability'),
+    store.getPage('security'),
+    store.getPage('infrastructure'),
+    store.getPage('costs'),
+    store.getPage('backup-dr'),
+    store.getPage('drift'),
+    store.getPage('deployments'),
   ]);
 
   return {
@@ -165,7 +185,41 @@ app.get('/v1/control/overview', async () => {
     region,
     configVersion,
     ...overview.data,
+    health: health.data,
+    observability: observability.data,
+    security: security.data,
+    infrastructure: infrastructure.data,
+    costs: costs.data,
+    backupDr: backupDr.data,
+    drift: drift.data,
+    deployments: deployments.data,
     updatedAt: overview.updatedAt,
+  };
+});
+
+app.get('/v1/control/operations/summary', async () => {
+  const [health, observability, security, infrastructure, costs, backupDr, drift] =
+    await Promise.all([
+      store.getPage('health'),
+      store.getPage('observability'),
+      store.getPage('security'),
+      store.getPage('infrastructure'),
+      store.getPage('costs'),
+      store.getPage('backup-dr'),
+      store.getPage('drift'),
+    ]);
+
+  return {
+    environment,
+    region,
+    collectedAt: new Date().toISOString(),
+    health,
+    observability,
+    security,
+    infrastructure,
+    costs,
+    backupDr,
+    drift,
   };
 });
 
@@ -503,6 +557,58 @@ if (database) {
     }),
     environment,
   );
+}
+
+if (process.env.AWS_OPERATIONS_COLLECTION_ENABLED === 'true') {
+  const collector = new AwsOperationsCollector({
+    region,
+    metricNamespace: process.env.PLATFORM_METRIC_NAMESPACE ?? 'Platform',
+  });
+
+  const refreshOperations = async (): Promise<void> => {
+    try {
+      const snapshot = await collector.collect();
+      await Promise.all([
+        store.setPage(
+          'observability',
+          { ...snapshot.observability, collectedAt: snapshot.collectedAt },
+          'operations-collector',
+        ),
+        store.setPage(
+          'security',
+          { ...snapshot.security, collectedAt: snapshot.collectedAt },
+          'operations-collector',
+        ),
+        store.setPage(
+          'costs',
+          { ...snapshot.costs, collectedAt: snapshot.collectedAt },
+          'operations-collector',
+        ),
+        store.setPage(
+          'backup-dr',
+          { ...snapshot.backupDr, collectedAt: snapshot.collectedAt },
+          'operations-collector',
+        ),
+      ]);
+    } catch (error) {
+      app.log.error(
+        {
+          err: error instanceof Error
+            ? { name: error.name, message: error.message }
+            : { name: 'UnknownError' },
+        },
+        'operations collection failed',
+      );
+    }
+  };
+
+  void refreshOperations();
+
+  const timer = setInterval(
+    () => void refreshOperations(),
+    Number(process.env.AWS_OPERATIONS_COLLECTION_INTERVAL_MS ?? 60_000),
+  );
+  timer.unref();
 }
 
 if (process.env.NODE_ENV !== 'test') {

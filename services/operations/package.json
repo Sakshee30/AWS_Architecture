@@ -1,0 +1,16 @@
+{
+  "name": "@platform/operations",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "exports": "./src/index.ts",
+  "dependencies": {
+    "@aws-sdk/client-backup": "^3.731.1",
+    "@aws-sdk/client-cloudtrail": "^3.731.1",
+    "@aws-sdk/client-cloudwatch": "^3.731.1",
+    "@aws-sdk/client-cost-explorer": "^3.731.1",
+    "@aws-sdk/client-guardduty": "^3.731.1",
+    "@aws-sdk/client-inspector2": "^3.731.1",
+    "@aws-sdk/client-securityhub": "^3.731.1"
+  }
+}
