@@ -1,0 +1,2 @@
+# Failure matrix
+Redis: circuit + cache bypass/DB fallback. Kafka/MSK: outbox retains events and alternate route where enabled. OpenSearch: PostgreSQL fallback. Worker: queue retains work. Pod/task: orchestrator replaces. AZ: Multi-AZ. AI: fallback/degraded AI only. S3: bounded retry/queue/clear error. CRM: retry+circuit+DLQ. Email: queue+retry. All retries are transient-only with bounded exponential backoff+jitter; critical operations remain idempotent.

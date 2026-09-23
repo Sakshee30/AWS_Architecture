@@ -1,0 +1,5 @@
+controls: [disable_signups, disable_file_uploads, disable_ai, disable_external_webhook_processing, disable_outbound_integrations, read_only, maintenance_mode]
+maintenance_scopes: [platform, tenant, workspace, service, feature]
+production:
+  separation_of_duties: true
+  audit_required: true

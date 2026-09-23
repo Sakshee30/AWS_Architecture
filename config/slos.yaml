@@ -1,0 +1,5 @@
+slos:
+  api_availability: {target: 99.9, window: 30d, owner: sre, severity: critical, runbook: docs/runbooks/api-slo.md}
+  api_latency_p95: {target_ms: 500, window: 30d, owner: api, severity: high, runbook: docs/runbooks/api-slo.md}
+  queue_age: {target_seconds: 120, owner: workers, severity: high, runbook: docs/runbooks/queue.md}
+  dlq_growth: {target: 0, owner: workers, severity: high, runbook: docs/runbooks/queue.md}

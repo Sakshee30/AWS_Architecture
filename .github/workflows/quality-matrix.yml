@@ -1,0 +1,16 @@
+name: Quality Matrix
+on: {pull_request: {}, workflow_dispatch: {}}
+permissions: {contents: read}
+jobs:
+ architecture:
+  runs-on: ubuntu-latest
+  steps:
+   - uses: actions/checkout@v4
+   - run: python tests/architecture/forbidden_imports.py
+   - run: for f in tests/architecture/validate_section*.py; do python "$f"; done
+ evidence:
+  runs-on: ubuntu-latest
+  strategy: {matrix: {gate: [unit, integration, contract, e2e, security, performance, resilience, migration, control-plane]}}
+  steps:
+   - uses: actions/checkout@v4
+   - run: echo "Gate ${{ matrix.gate }} requires repository-specific execution evidence before production."

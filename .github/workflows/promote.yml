@@ -1,0 +1,17 @@
+name: Environment Promotion
+on:
+ workflow_dispatch:
+  inputs:
+   environment: {type: choice, options: [dev, test, staging, production], required: true}
+   image_digest: {description: "Immutable sha256 image digest", required: true}
+permissions: {contents: read}
+jobs:
+ gate:
+  environment: ${{ inputs.environment }}
+  runs-on: ubuntu-latest
+  steps:
+   - uses: actions/checkout@v4
+   - run: echo "${{ inputs.image_digest }}" | grep -Eq '^sha256:[a-fA-F0-9]{64}$'
+   - run: printf 'git=%s\nimage=%s\nenvironment=%s\n' "${GITHUB_SHA}" "${{ inputs.image_digest }}" "${{ inputs.environment }}" | tee release-evidence.txt
+   - uses: actions/upload-artifact@v4
+     with: {name: "release-evidence-${{ inputs.environment }}", path: release-evidence.txt}
