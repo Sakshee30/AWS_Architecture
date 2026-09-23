@@ -14,7 +14,8 @@ resource "aws_s3_bucket_versioning" "logs" {
 }
 resource "aws_s3_bucket_server_side_encryption_configuration" "logs" {
  bucket = aws_s3_bucket.logs.id
- rule { apply_server_side_encryption_by_default {
+ rule {
+    apply_server_side_encryption_by_default {
   sse_algorithm = var.kms_key_arn == null ? "AES256" : "aws:kms"
   kms_master_key_id = var.kms_key_arn
  }}
@@ -44,7 +45,14 @@ resource "aws_iam_role_policy_attachment" "config" { role=aws_iam_role.config.na
 resource "aws_config_configuration_recorder" "this" {
  name = "${var.name}-recorder"
  role_arn = aws_iam_role.config.arn
- recording_group { all_supported=true include_global_resource_types=true }
+ recording_group {
+    all_supported                 = true
+    include_global_resource_types = true
+  }
 }
-resource "aws_config_delivery_channel" "this" { name="${var.name}-delivery" s3_bucket_name=aws_s3_bucket.logs.id depends_on=[aws_config_configuration_recorder.this] }
+resource "aws_config_delivery_channel" "this" {
+  name           = "${var.name}-delivery"
+  s3_bucket_name = aws_s3_bucket.logs.id
+  depends_on     = [aws_config_configuration_recorder.this]
+}
 resource "aws_config_configuration_recorder_status" "this" { name=aws_config_configuration_recorder.this.name is_enabled=true depends_on=[aws_config_delivery_channel.this] }

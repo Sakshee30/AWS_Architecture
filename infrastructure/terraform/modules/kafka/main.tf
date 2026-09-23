@@ -8,7 +8,11 @@ resource "aws_msk_cluster" "this" {
     instance_type   = var.broker_instance_type
     client_subnets  = var.subnet_ids
     security_groups = var.security_group_ids
-    storage_info { ebs_storage_info { volume_size = 100 } }
+    storage_info {
+      ebs_storage_info {
+        volume_size = 100
+      }
+    }
   }
 
   encryption_info {
