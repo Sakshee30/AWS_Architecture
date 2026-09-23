@@ -15,11 +15,35 @@ variable "container_image" {
   }
 }
 
-variable "container_port" { type = number default = 8080 }
-variable "cpu" { type = number default = 512 }
-variable "memory" { type = number default = 1024 }
-variable "desired_count" { type = number default = 2 }
-variable "min_capacity" { type = number default = 2 }
-variable "max_capacity" { type = number default = 20 }
-variable "cpu_target" { type = number default = 70 }
-variable "tags" { type = map(string) default = {} }
+variable "container_port" {
+  type    = number
+  default = 8080
+}
+variable "cpu" {
+  type    = number
+  default = 512
+}
+variable "memory" {
+  type    = number
+  default = 1024
+}
+variable "desired_count" {
+  type    = number
+  default = 2
+}
+variable "min_capacity" {
+  type    = number
+  default = 2
+}
+variable "max_capacity" {
+  type    = number
+  default = 20
+}
+variable "cpu_target" {
+  type    = number
+  default = 70
+}
+variable "tags" {
+  type    = map(string)
+  default = {}
+}
