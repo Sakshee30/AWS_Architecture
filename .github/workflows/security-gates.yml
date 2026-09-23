@@ -1,21 +1,26 @@
 name: Security Gates
+
 on:
   pull_request:
   push:
     branches: [main]
+
 permissions:
   contents: read
   security-events: write
+
 jobs:
   secrets:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with: {fetch-depth: 0}
+        with:
+          fetch-depth: 0
       - name: Secret scan working tree
         uses: docker://zricethezav/gitleaks:v8.24.3
         with:
           args: detect --no-git --source=/github/workspace --redact --exit-code=1
+
   sast:
     runs-on: ubuntu-latest
     steps:
@@ -24,15 +29,24 @@ jobs:
         with:
           languages: javascript-typescript
       - uses: github/codeql-action/analyze@v3
+
   sca:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: {node-version: "22"}
-      - name: Dependency audit
+        with:
+          node-version: "22"
+      - name: Install dependency graph
         run: |
-          if [ -f package-lock.json ]; then npm audit --audit-level=high; else npm install --package-lock=false && npm audit --audit-level=high || true; fi
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+      - name: Reject high-severity dependency vulnerabilities
+        run: npm audit --audit-level=high
+
   iac:
     runs-on: ubuntu-latest
     steps:
@@ -42,7 +56,8 @@ jobs:
           scan-type: config
           scan-ref: infrastructure
           severity: CRITICAL
-          exit-code: '1'
+          exit-code: "1"
+
   container:
     runs-on: ubuntu-latest
     steps:
@@ -54,7 +69,7 @@ jobs:
           image-ref: aws-architecture-api:scan
           format: table
           severity: HIGH,CRITICAL
-          exit-code: '1'
+          exit-code: "1"
           scanners: vuln
           vuln-type: os,library
           ignore-unfixed: true

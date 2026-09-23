@@ -1,8 +1,13 @@
-terraform { required_version = ">= 1.6.0" }
+terraform {
+  required_version = ">= 1.6.0"
+}
 
 provider "aws" {
   region = var.aws_region
-  default_tags { tags = local.tags }
+
+  default_tags {
+    tags = local.tags
+  }
 }
 
 locals {
@@ -20,6 +25,7 @@ module "platform" {
 
   application_name           = var.application_name
   environment                = "prod"
+  aws_region                 = var.aws_region
   vpc_cidr                   = var.vpc_cidr
   azs                        = var.azs
   public_subnet_cidrs        = var.public_subnet_cidrs
@@ -34,10 +40,14 @@ module "platform" {
   enable_ecs        = var.enable_ecs
   enable_gpu_nodes  = var.enable_gpu_nodes
   enable_alb        = var.enable_alb
+  enable_cloudfront = var.enable_cloudfront
 
-  container_image      = var.container_image
-  eks_cluster_role_arn = var.eks_cluster_role_arn
-  eks_node_role_arn    = var.eks_node_role_arn
+  container_image            = var.container_image
+  eks_cluster_role_arn       = var.eks_cluster_role_arn
+  eks_node_role_arn          = var.eks_node_role_arn
+  certificate_arn            = var.certificate_arn
+  cloudfront_certificate_arn = var.cloudfront_certificate_arn
+  cloudfront_aliases         = var.cloudfront_aliases
 
   secret_names          = var.secret_names
   non_secret_parameters = var.non_secret_parameters

@@ -1,7 +1,8 @@
 variable "aws_region" {
-  type = string
+  type    = string
   default = "ap-south-1"
 }
+
 variable "application_name" { type = string }
 variable "owner" { type = string }
 variable "cost_center" { type = string }
@@ -10,59 +11,94 @@ variable "azs" { type = list(string) }
 variable "public_subnet_cidrs" { type = list(string) }
 variable "private_app_subnet_cidrs" { type = list(string) }
 variable "isolated_data_subnet_cidrs" { type = list(string) }
+
 variable "enable_nat_gateway" {
-  type = bool
+  type    = bool
   default = true
 }
+
 variable "enable_redis" {
-  type = bool
-  default = false
+  type    = bool
+  default = true
 }
+
 variable "enable_msk" {
-  type = bool
+  type    = bool
   default = false
 }
+
 variable "enable_opensearch" {
-  type = bool
+  type    = bool
   default = false
 }
+
 variable "enable_eks" {
-  type = bool
+  type    = bool
   default = false
 }
+
 variable "enable_ecs" {
-  type = bool
+  type    = bool
   default = true
 }
+
 variable "enable_gpu_nodes" {
-  type = bool
+  type    = bool
   default = false
 }
+
 variable "enable_alb" {
-  type = bool
+  type    = bool
   default = true
 }
+
+variable "enable_cloudfront" {
+  type    = bool
+  default = true
+}
+
 variable "container_image" {
-  type = string
+  type        = string
   description = "Immutable image reference repository@sha256:digest."
+
   validation {
-    condition = can(regex("@sha256:[a-fA-F0-9]{64}$", var.container_image))
+    condition     = can(regex("@sha256:[a-fA-F0-9]{64}$", var.container_image))
     error_message = "container_image must be pinned to an immutable sha256 digest."
   }
 }
-variable "eks_cluster_role_arn" {
-  type = string
-  default = null
+
+variable "certificate_arn" {
+  type        = string
+  description = "Regional ACM certificate used by the public ALB."
 }
-variable "eks_node_role_arn" {
-  type = string
-  default = null
+
+variable "cloudfront_certificate_arn" {
+  type        = string
+  description = "Optional us-east-1 ACM certificate used by CloudFront aliases."
+  default     = null
 }
-variable "secret_names" {
-  type = set(string)
+
+variable "cloudfront_aliases" {
+  type    = list(string)
   default = []
 }
+
+variable "eks_cluster_role_arn" {
+  type    = string
+  default = null
+}
+
+variable "eks_node_role_arn" {
+  type    = string
+  default = null
+}
+
+variable "secret_names" {
+  type    = set(string)
+  default = []
+}
+
 variable "non_secret_parameters" {
-  type = map(string)
+  type    = map(string)
   default = {}
 }

@@ -1,28 +1,40 @@
 name: Sections 1-30 Integration Contract
+
 on:
   pull_request:
   push:
     branches: [main]
-permissions: {contents: read}
+
+permissions:
+  contents: read
+
 jobs:
-  architecture:
+  integrated-contract:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: {node-version: "22"}
-      - name: Section 16-30 static architecture checks
+        with:
+          node-version: "22"
+
+      - name: Validate architecture integration
         run: |
           python tests/architecture/validate_integration_1_15.py
-          for f in tests/architecture/validate_section*.py; do python "$f"; done
-      - name: Install integrated workspace
+          for file in tests/architecture/validate_section*.py; do
+            python "$file"
+          done
+
+      - name: Install workspace
         run: |
           if [ -f package-lock.json ]; then
             npm ci
           else
             npm install --package-lock=false
           fi
+
       - name: TypeScript typecheck
-        run: npm run typecheck --if-present
-      - name: Full integrated test suite
-        run: npm test --if-present
+        run: npm run typecheck
+      - name: Build server runtime
+        run: npm run build:server
+      - name: Run integrated tests
+        run: npm test

@@ -1,65 +1,107 @@
 name: PR Quality and Security
+
 on:
   pull_request:
+
 permissions:
   contents: read
   security-events: write
+
 jobs:
-  precommit-equivalent:
+  code-quality:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
-        with: {node-version: "22"}
-      - name: Install
+        with:
+          node-version: "22"
+
+      - name: Install workspace
         run: |
-          if [ -f package-lock.json ]; then npm ci; else npm install --package-lock=false; fi
-      - run: npm run format:check --if-present
-      - run: npm run lint --if-present
-      - run: npm run typecheck --if-present
-      - run: npm test --if-present
-      - run: for f in tests/architecture/validate_section*.py; do python "$f"; done
-  dependency-license-contract:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with: {node-version: "22"}
-      - name: Install
-        run: |
-          if [ -f package-lock.json ]; then npm ci; else npm install --package-lock=false; fi
-      - run: npm audit --audit-level=high || true
-      - name: License check
-        run: npx --yes license-checker-rseidelsohn --production --summary
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install --package-lock=false
+          fi
+
+      - name: TypeScript typecheck
+        run: npm run typecheck
+      - name: Unit tests
+        run: npm run test:unit
+      - name: Integration tests
+        run: npm run test:integration
       - name: Contract tests
-        run: npm run test:contract --if-present
-  security:
+        run: npm run test:contract
+      - name: Security tests
+        run: npm run test:security
+      - name: Architecture checks
+        run: |
+          python tests/architecture/forbidden_imports.py
+          for file in tests/architecture/validate_section*.py; do
+            python "$file"
+          done
+
+  dependency-policy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with: {fetch-depth: 0}
-      - name: Secret scan working tree
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Install workspace
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci
+          else
+            npm install
+          fi
+
+      - name: Reject high-severity dependency vulnerabilities
+        run: npm audit --audit-level=high
+
+      - name: License inventory
+        run: npx --yes license-checker-rseidelsohn --production --summary
+
+  secrets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Secret scan
         uses: docker://zricethezav/gitleaks:v8.24.3
         with:
           args: detect --no-git --source=/github/workspace --redact --exit-code=1
-      - uses: aquasecurity/trivy-action@v0.36.0
-        with: {scan-type: fs, scan-ref: ".", format: table, exit-code: "1", severity: "HIGH,CRITICAL"}
+      - name: Filesystem vulnerability scan
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: "."
+          format: table
+          exit-code: "1"
+          severity: "HIGH,CRITICAL"
+
   sast:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: github/codeql-action/init@v3
-        with: {languages: javascript-typescript}
+        with:
+          languages: javascript-typescript
       - uses: github/codeql-action/analyze@v3
-  iac-docker:
+
+  iac-container:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: aquasecurity/trivy-action@v0.36.0
+      - name: IaC policy scan
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: config
           scan-ref: infrastructure
           format: table
           exit-code: "1"
           severity: "CRITICAL"
-      - run: docker build -f infrastructure/docker/api.Dockerfile -t section21-pr-api:${GITHUB_SHA} .
+      - name: Build production API image
+        run: docker build -f infrastructure/docker/api.Dockerfile -t pr-api:${GITHUB_SHA} .

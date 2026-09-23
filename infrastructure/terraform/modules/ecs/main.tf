@@ -12,9 +12,29 @@ resource "aws_ecs_task_definition" "this" {
       name      = var.name
       image     = var.container_image
       essential = true
-      portMappings = [{ containerPort = var.container_port, protocol = "tcp" }]
+
+      portMappings = [
+        {
+          containerPort = var.container_port
+          protocol      = "tcp"
+        }
+      ]
+
+      environment = [
+        {
+          name  = "PORT"
+          value = tostring(var.container_port)
+        }
+      ]
+
       readonlyRootFilesystem = true
-      linuxParameters = { capabilities = { drop = ["ALL"] } }
+
+      linuxParameters = {
+        capabilities = {
+          drop = ["ALL"]
+        }
+      }
+
       healthCheck = {
         command     = ["CMD-SHELL", "wget -qO- http://127.0.0.1:${var.container_port}/health/live || exit 1"]
         interval    = 30
@@ -35,15 +55,30 @@ resource "aws_ecs_service" "this" {
   desired_count   = var.desired_count
   launch_type     = "FARGATE"
 
+  health_check_grace_period_seconds = var.target_group_arn == null ? 0 : var.health_check_grace_period_seconds
+
   deployment_circuit_breaker {
     enable   = true
     rollback = true
   }
 
+  deployment_minimum_healthy_percent = 100
+  deployment_maximum_percent         = 200
+
   network_configuration {
     subnets          = var.subnet_ids
     security_groups  = var.security_group_ids
     assign_public_ip = false
+  }
+
+  dynamic "load_balancer" {
+    for_each = var.target_group_arn == null ? [] : [var.target_group_arn]
+
+    content {
+      target_group_arn = load_balancer.value
+      container_name   = var.name
+      container_port   = var.container_port
+    }
   }
 
   tags = var.tags
@@ -71,6 +106,24 @@ resource "aws_appautoscaling_policy" "cpu" {
 
     predefined_metric_specification {
       predefined_metric_type = "ECSServiceAverageCPUUtilization"
+    }
+  }
+}
+
+resource "aws_appautoscaling_policy" "memory" {
+  name               = "${var.name}-memory-target"
+  policy_type        = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.this.resource_id
+  scalable_dimension = aws_appautoscaling_target.this.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.this.service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    target_value       = var.memory_target
+    scale_in_cooldown  = 300
+    scale_out_cooldown = 60
+
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageMemoryUtilization"
     }
   }
 }
