@@ -1,6 +1,6 @@
 # GitOps desired-state workflow
 
-Git is the source of truth for infrastructure and production capability state.
+Git is the source of truth for infrastructure and production capability state. Sections 1–15 define the platform foundation; Sections 16–30 extend it with production GitOps/change orchestration.
 
 1. Platform Control Center creates a change request; it never runs shell commands or deletes AWS resources directly.
 2. Dependency/policy validation and impact analysis must pass.
@@ -10,7 +10,7 @@ Git is the source of truth for infrastructure and production capability state.
 6. Terraform apply or GitOps reconciliation runs with workload identity/short-lived credentials.
 7. The immutable application image is deployed without rebuilding.
 8. Smoke tests and CloudWatch/SLO health gates verify actual state.
-9. The change is completed only when desired state, actual state and health agree.
+9. The change completes only when desired state, actual state and health agree.
 10. Failure transitions to rollback using the previous configuration/IaC revision.
 
-Application provider configuration and Terraform enable flags must agree: enable_redis, enable_msk, enable_opensearch, enable_eks and enable_gpu_nodes. Drift is an operational failure and must be surfaced, never silently accepted.
+Application provider configuration and Terraform enable flags must agree. Drift is an operational failure and must be surfaced, never silently accepted.

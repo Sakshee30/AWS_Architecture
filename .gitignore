@@ -1,8 +1,17 @@
-# Terraform
+node_modules/
+dist/
+.next/
+coverage/
+.env
+.env.*
+!.env.example
+*.log
+.DS_Store
 **/.terraform/*
 *.tfstate
 *.tfstate.*
 *.tfplan
+terraform.tfvars
 crash.log
 override.tf
 override.tf.json
@@ -10,9 +19,5 @@ override.tf.json
 *_override.tf.json
 .terraformrc
 terraform.rc
-# secrets
-.env
-.env.*
-!.env.example
 *.pem
 *.key
