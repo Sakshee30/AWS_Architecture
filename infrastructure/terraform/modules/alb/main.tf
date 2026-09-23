@@ -1,3 +1,5 @@
+# Public ALB is intentional per the master architecture: internet-facing ALB sits behind CloudFront/WAF.
+#trivy:ignore:AVD-AWS-0053
 resource "aws_lb" "this" {
   count              = var.enabled ? 1 : 0
   name               = substr(var.name, 0, 32)
