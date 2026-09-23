@@ -1,5 +1,6 @@
 variable "name" { type = string }
 variable "cluster_arn" { type = string }
+variable "cluster_name" { type = string }
 variable "subnet_ids" { type = list(string) }
 variable "security_group_ids" { type = list(string) }
 variable "execution_role_arn" { type = string }
