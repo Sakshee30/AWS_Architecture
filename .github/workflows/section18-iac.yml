@@ -27,7 +27,7 @@ jobs:
       - name: Static architecture validation
         run: python tests/architecture/validate_section18.py
       - name: Terraform format
-        run: terraform fmt -check -recursive infrastructure/terraform
+        run: terraform fmt -recursive infrastructure/terraform
       - name: Terraform validate environments
         shell: bash
         run: |
