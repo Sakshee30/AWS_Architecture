@@ -8,12 +8,21 @@ export const SECURITY_HEADERS:Record<string,string>={
  'content-security-policy':"default-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'"
 };
 
+function forbiddenHostname(host:string):boolean{
+ const h=host.toLowerCase();
+ if(h==='localhost'||h.endsWith('.local'))return true;
+ if(/^127\./.test(h)||/^0\./.test(h)||/^10\./.test(h)||/^192\.168\./.test(h)||/^169\.254\./.test(h))return true;
+ const m=h.match(/^172\.(\d+)\./); if(m&&Number(m[1])>=16&&Number(m[1])<=31)return true;
+ if(h==='::1'||h.startsWith('fc')||h.startsWith('fd')||h.startsWith('fe80:'))return true;
+ return false;
+}
+
 export function assertSafeOutboundUrl(raw:string,allowedHosts:string[]):URL{
  const url=new URL(raw);
  if(url.protocol!=='https:')throw Object.assign(new Error('Only HTTPS outbound URLs are allowed'),{code:'UNSAFE_OUTBOUND_URL'});
  const host=url.hostname.toLowerCase();
- if(!allowedHosts.some(x=>host===x||host.endsWith('.'+x)))throw Object.assign(new Error('Outbound host is not allow-listed'),{code:'OUTBOUND_HOST_NOT_ALLOWED'});
- if(host==='localhost'||host.endsWith('.local'))throw Object.assign(new Error('Local destinations are forbidden'),{code:'SSRF_DESTINATION_FORBIDDEN'});
+ if(forbiddenHostname(host))throw Object.assign(new Error('Private/link-local destinations are forbidden'),{code:'SSRF_DESTINATION_FORBIDDEN'});
+ if(!allowedHosts.map(x=>x.toLowerCase()).some(x=>host===x||host.endsWith('.'+x)))throw Object.assign(new Error('Outbound host is not allow-listed'),{code:'OUTBOUND_HOST_NOT_ALLOWED'});
  return url;
 }
 

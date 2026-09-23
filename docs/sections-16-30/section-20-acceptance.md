@@ -1,6 +1,18 @@
 # Section 20 acceptance — Cybersecurity Architecture
-Status: IMPLEMENTED / SECURITY VALIDATION PENDING
+Status: IMPLEMENTED / EXECUTION EVIDENCE PENDING
 
-Implemented reusable application security controls (HSTS/CSP/security headers, SSRF/outbound URL guard, signed-webhook timestamp/signature replay guard, structured sensitive-data redaction), AWS WAF managed-rule/rate-limit module, mandatory STRIDE abuse-case baseline, secret scanning and IaC security scanning workflow, plus static architecture validation.
+Implemented edge/network/application/supply-chain security controls required by Section 20:
+- WAF managed common and known-bad-input rules plus IP rate limiting.
+- HTTPS/HSTS/CSP/X-Content-Type-Options/Referrer-Policy/Permissions-Policy response policy.
+- Outbound URL validation with HTTPS allow-listing and IPv4/IPv6 private/link-local SSRF rejection.
+- Webhook HMAC signature verification, timestamp replay window and timing-safe comparison.
+- Sensitive-value redaction for credentials, cookies, tokens, API keys, payment and document content fields.
+- KMS-backed infrastructure encryption primitives and an application-level AES-256-GCM field-encryption service behind a DataKeyProvider contract.
+- STRIDE baseline covering cross-tenant access, webhook replay, duplicate queue delivery, Redis outage, AI prompt injection, leaked signed URLs and privileged compromise.
+- CI security gates for secret scanning, SAST/CodeQL, dependency audit when a lockfile is available, IaC scanning and container image vulnerability scanning.
 
-Existing Sections 16–18 provide KMS, Secrets Manager, private/isolated subnet patterns and least-privilege IAM foundations. Production acceptance additionally requires deployed WAF/edge evidence, SAST/SCA/DAST/container scan evidence, penetration/cross-tenant tests and workload-specific threat-model signoff.
+This implementation preserves the master architecture rule: cloud/security providers stay behind contracts and production security controls are not exposed as disable switches.
+
+Automated static validation: tests/architecture/validate_section20.py.
+
+Production acceptance still requires real workflow execution, DAST/penetration evidence, KMS/Secrets Manager integration evidence, WAF deployment evidence, and retained scan artifacts. These are intentionally not claimed until executed.
