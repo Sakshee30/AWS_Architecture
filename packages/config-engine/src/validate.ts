@@ -26,6 +26,18 @@ function sel(v:unknown):CapabilitySelection|undefined{if(!v||typeof v!=='object'
 export function validateDesiredState(state:DesiredState):ValidationIssue[]{
  const issues:ValidationIssue[]=[];if(!state?.platform||!state?.features)return[{path:'$',code:'INVALID_SHAPE',message:'Desired state must contain platform and features.'}];
  const p=state.platform as unknown as Record<string,unknown>;
+ for(const [name,value] of Object.entries(state.features as Record<string,unknown>)){
+  if(typeof value!=='boolean')issues.push({path:`features.${name}`,code:'INVALID_FEATURE_FLAG',message:`Feature flag ${name} must be boolean`});
+ }
+ const observability=(state.platform as unknown as {observability?:Record<string,unknown>}).observability;
+ if(observability){
+  for(const key of ['metrics','tracing','logging'])if(typeof observability[key]!=='boolean')issues.push({path:`platform.observability.${key}`,code:'INVALID_OBSERVABILITY_FLAG',message:`Observability flag ${key} must be boolean`});
+ }
+ if(state.limits){
+  for(const [name,value] of Object.entries(state.limits as Record<string,unknown>)){
+   if(typeof value!=='number'||!Number.isFinite(value)||value<0)issues.push({path:`limits.${name}`,code:'INVALID_LIMIT',message:`Limit ${name} must be a finite non-negative number`});
+  }
+ }
  for(const [name,allowed] of Object.entries(providers)){const s=sel(p[name]);if(!s){issues.push({path:`platform.${name}`,code:'MISSING_CAPABILITY',message:`Missing or malformed capability ${name}`});continue}if(!allowed.has(s.provider))issues.push({path:`platform.${name}.provider`,code:'INVALID_PROVIDER',message:`Unsupported provider ${s.provider}`});if(s.required&&!s.enabled)issues.push({path:`platform.${name}.enabled`,code:'REQUIRED_DISABLED',message:`${name} is required`});if(s.enabled&&fallbackProviders[name]&&!s.fallback)issues.push({path:`platform.${name}.fallback`,code:'MISSING_FALLBACK',message:`Enabled ${name} requires fallback/degraded mode`});if(s.fallback&&fallbackProviders[name]&&!fallbackProviders[name]!.has(s.fallback))issues.push({path:`platform.${name}.fallback`,code:'INVALID_FALLBACK',message:`Unsupported fallback ${s.fallback}`})}
  const db=sel(p.database),storage=sel(p.object_storage),ai=sel(p.ai),vector=sel(p.vector_store),cache=sel(p.cache),queue=sel(p.queue),lock=sel(p.distributed_lock),idem=sel(p.idempotency);
  if(!db?.enabled||db.provider!=='postgres')issues.push({path:'platform.database',code:'LOCKED_DATABASE',message:'Primary PostgreSQL database is required.'});

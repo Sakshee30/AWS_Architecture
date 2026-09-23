@@ -8,4 +8,8 @@ export interface PolicyContext{environment:Environment;actorRoles:string[];switc
 export function evaluatePlatformPolicy(c:PolicyContext){const reasons:string[]=[];const production=c.environment==='production';const privileged=c.actorRoles.some(r=>['platform-admin','sre','security-admin','devops'].includes(r));if(!privileged)reasons.push('PLATFORM_ADMIN_ROLE_REQUIRED');if(production&&['disable','stop','destroy'].includes(c.operation)&&isLockedProductionCapability(c.capability))reasons.push('LOCKED_PRODUCTION_CAPABILITY');const approvalRequired=production&&['application-provider','infrastructure','compute-migration'].includes(c.switchClass);if(approvalRequired&&!c.approved)reasons.push('PRODUCTION_APPROVAL_REQUIRED');if(c.operation==='destroy'&&c.switchClass==='runtime')reasons.push('RUNTIME_SWITCH_CANNOT_DESTROY_INFRASTRUCTURE');return{allowed:reasons.length===0,reasons,approvalRequired}}
 export function assertLockedState(state:DesiredState,environment:Environment):void{if(environment!=='production')return;const violations:string[]=[];if(!state.platform.database.enabled)violations.push('primary_persistent_datastore');if(!state.platform.observability.logging)violations.push('structured_logging');if(violations.length)throw new Error(`Locked production capabilities disabled: ${violations.join(', ')}`)}
 
-export const lockedProductionCapability = isLockedProductionCapability;
+export function lockedProductionCapability(v:string):string|false{
+ const c=canonicalCapabilityName(v);
+ const canonical=aliases[c]??c;
+ return LOCKED_PRODUCTION_CAPABILITIES.includes(canonical as never)?canonical:false;
+}
