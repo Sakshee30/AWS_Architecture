@@ -20,6 +20,12 @@ spec:
       containers:
       - name: worker
         image: REPLACE_WITH_IMMUTABLE_DIGEST
+        env:
+        - name: JOB_QUEUE_URL
+          valueFrom:
+            secretKeyRef:
+              name: worker-runtime
+              key: jobQueueUrl
         securityContext:
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
@@ -32,6 +38,41 @@ spec:
           limits:
             cpu: "2"
             memory: "2Gi"
+        startupProbe:
+          httpGet:
+            path: /health/startup
+            port: 8080
+          failureThreshold: 30
+          periodSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8080
+          periodSeconds: 10
+          failureThreshold: 3
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 8080
+          periodSeconds: 20
+          failureThreshold: 3
+        volumeMounts:
+        - name: tmp
+          mountPath: /tmp
+      volumes:
+      - name: tmp
+        emptyDir: {}
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: platform-worker
+  namespace: workers
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: platform-worker
 ---
 apiVersion: keda.sh/v1alpha1
 kind: ScaledObject
@@ -43,6 +84,7 @@ spec:
     name: platform-worker
   minReplicaCount: 0
   maxReplicaCount: 50
+  cooldownPeriod: 300
   triggers:
   - type: aws-sqs-queue
     metadata:
