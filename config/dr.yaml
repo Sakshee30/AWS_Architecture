@@ -1,0 +1,6 @@
+capabilities:
+  postgres: {rpo_minutes: 5, rto_minutes: 60, recovery: "RDS automated backup + PITR", restore_test: quarterly}
+  s3: {rpo_minutes: 60, rto_minutes: 120, recovery: "versioning/lifecycle; replication only when required", restore_test: quarterly}
+  queues: {rpo_minutes: 5, rto_minutes: 60, recovery: "DLQ + idempotent replay", restore_test: quarterly}
+  configuration: {rpo_minutes: 0, rto_minutes: 30, recovery: "Git + AppConfig version rollback", restore_test: quarterly}
+strategy: "Prefer Multi-AZ; cross-region/active-active only with documented business justification."
