@@ -1,0 +1,2 @@
+# Quality gates
+Unit: domain rules/adapters/factories/validators. Integration: PostgreSQL/Redis/SQS/Kafka/S3/search. Contract: REST/OpenAPI/events/provider interfaces. Architecture: forbidden imports/dependency direction. E2E: critical journeys. Security: authz/cross-tenant/upload/webhook replay/input attacks. Performance: load/spike/soak/query. Resilience/chaos: dependency failures/retry/circuit/DLQ and Redis/Kafka/RDS/pod/network/AI. Backup: restore. Migration: forward/backward expand-contract. Control plane: dependency validation/approval/apply/rollback/drift.
