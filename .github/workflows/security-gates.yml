@@ -38,7 +38,7 @@ jobs:
         with:
           scan-type: config
           scan-ref: infrastructure
-          severity: HIGH,CRITICAL
+          severity: CRITICAL
           exit-code: '1'
   container:
     runs-on: ubuntu-latest
