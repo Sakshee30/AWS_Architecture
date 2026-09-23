@@ -15,12 +15,14 @@ jobs:
         run: |
           python tests/architecture/validate_integration_1_15.py
           for f in tests/architecture/validate_section*.py; do python "$f"; done
-      - name: TypeScript typecheck when root project is available
-        shell: bash
+      - name: Install integrated workspace
         run: |
-          if [ -f package.json ] && [ -f tsconfig.json ]; then
+          if [ -f package-lock.json ]; then
             npm ci
-            npm run typecheck --if-present
           else
-            echo "Root Sections 1-15 workspace not yet merged into this repository; static integration contract verified."
+            npm install --package-lock=false
           fi
+      - name: TypeScript typecheck
+        run: npm run typecheck --if-present
+      - name: Full integrated test suite
+        run: npm test --if-present

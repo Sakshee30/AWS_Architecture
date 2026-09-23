@@ -2,7 +2,7 @@
 FROM node:22.11.0-alpine3.20 AS deps
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci
+RUN if [ -f package-lock.json ]; then npm ci; else npm install --package-lock=false; fi
 
 FROM node:22.11.0-alpine3.20 AS build
 WORKDIR /app
