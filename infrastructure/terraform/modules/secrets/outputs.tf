@@ -1,0 +1,1 @@
+output "secret_metadata" { value = { for name, secret in aws_secretsmanager_secret.this : name => { arn = secret.arn, name = secret.name } } }
