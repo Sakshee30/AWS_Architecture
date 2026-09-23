@@ -1,0 +1,2 @@
+# Secrets Manager module
+Provision secret containers, least-privilege resource policies and rotation integration points. Never commit secret values to Terraform state inputs or repository files. Applications consume secrets through the SecretProvider boundary defined by the platform core.
