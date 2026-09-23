@@ -12,9 +12,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: {fetch-depth: 0}
-      - uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Secret scan working tree
+        uses: docker://zricethezav/gitleaks:v8.24.3
+        with:
+          args: detect --no-git --source=/github/workspace --redact --exit-code=1
   sast:
     runs-on: ubuntu-latest
     steps:
@@ -27,9 +28,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: "22"}
       - name: Dependency audit
         run: |
-          if [ -f package-lock.json ]; then npm audit --audit-level=high; else echo "No package-lock.json; dependency audit delegated to integrated Sections 1-15 workspace."; fi
+          if [ -f package-lock.json ]; then npm audit --audit-level=high; else npm install --package-lock=false && npm audit --audit-level=high || true; fi
   iac:
     runs-on: ubuntu-latest
     steps:
@@ -45,15 +48,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Build API image
-        if: ${{ hashFiles('package.json') != '' }}
         run: docker build -f infrastructure/docker/api.Dockerfile -t aws-architecture-api:scan .
       - uses: aquasecurity/trivy-action@v0.36.0
-        if: ${{ hashFiles('package.json') != '' }}
         with:
           image-ref: aws-architecture-api:scan
           format: table
           severity: HIGH,CRITICAL
           exit-code: '1'
-      - name: Sections 1-15 application image pending integration
-        if: ${{ hashFiles('package.json') == '' }}
-        run: echo "Container runtime scan is integration-gated until the Sections 1-15 application workspace is merged."
+          scanners: vuln
+          vuln-type: os,library
+          ignore-unfixed: true

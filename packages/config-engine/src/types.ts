@@ -19,3 +19,12 @@ export interface DesiredState{
   features:Record<string,boolean>;
   limits?:Record<string,number>;
 }
+
+export interface ConfigLayers {
+  compiledDefaults: DesiredState;
+  environment?: Partial<DesiredState>;
+  secretReferences?: Partial<DesiredState>;
+  platformDesiredState?: Partial<DesiredState>;
+  tenantOverrides?: Partial<DesiredState>;
+  workspaceOverrides?: Partial<DesiredState>;
+}
