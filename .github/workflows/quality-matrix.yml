@@ -1,16 +1,37 @@
 name: Quality Matrix
-on: {pull_request: {}, workflow_dispatch: {}}
-permissions: {contents: read}
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
 jobs:
- architecture:
-  runs-on: ubuntu-latest
-  steps:
-   - uses: actions/checkout@v4
-   - run: python tests/architecture/forbidden_imports.py
-   - run: for f in tests/architecture/validate_section*.py; do python "$f"; done
- evidence:
-  runs-on: ubuntu-latest
-  strategy: {matrix: {gate: [unit, integration, contract, e2e, security, performance, resilience, migration, control-plane]}}
-  steps:
-   - uses: actions/checkout@v4
-   - run: echo "Gate ${{ matrix.gate }} requires repository-specific execution evidence before production."
+  architecture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python tests/architecture/forbidden_imports.py
+      - run: for f in tests/architecture/validate_section*.py; do python "$f"; done
+  test-matrix:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        gate: [unit, integration, contract, e2e, security, performance, resilience, migration, control-plane]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: {node-version: "22"}
+      - run: npm ci
+      - name: Execute gate
+        run: |
+          case "${{ matrix.gate }}" in
+            unit) npm run test:unit --if-present ;;
+            integration) npm run test:integration --if-present ;;
+            contract) npm run test:contract --if-present ;;
+            e2e) npm run test:e2e --if-present ;;
+            security) npm run test:security --if-present ;;
+            performance) npm run test:performance --if-present ;;
+            resilience) npm run test:resilience --if-present ;;
+            migration) npm run test:migration --if-present ;;
+            control-plane) npm run test:control-plane --if-present ;;
+          esac

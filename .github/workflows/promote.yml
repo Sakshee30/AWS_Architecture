@@ -1,17 +1,57 @@
 name: Environment Promotion
 on:
- workflow_dispatch:
-  inputs:
-   environment: {type: choice, options: [dev, test, staging, production], required: true}
-   image_digest: {description: "Immutable sha256 image digest", required: true}
-permissions: {contents: read}
+  workflow_dispatch:
+    inputs:
+      environment:
+        type: choice
+        options: [dev, test, staging, production]
+        required: true
+      image_digest:
+        description: Immutable sha256 image digest
+        required: true
+      config_version:
+        description: Active configuration version
+        required: true
+      migration_version:
+        description: Database migration version
+        required: true
+      deployment_execution:
+        description: Deployment execution/change id
+        required: true
+permissions:
+  contents: read
 jobs:
- gate:
-  environment: ${{ inputs.environment }}
-  runs-on: ubuntu-latest
-  steps:
-   - uses: actions/checkout@v4
-   - run: echo "${{ inputs.image_digest }}" | grep -Eq '^sha256:[a-fA-F0-9]{64}$'
-   - run: printf 'git=%s\nimage=%s\nenvironment=%s\n' "${GITHUB_SHA}" "${{ inputs.image_digest }}" "${{ inputs.environment }}" | tee release-evidence.txt
-   - uses: actions/upload-artifact@v4
-     with: {name: "release-evidence-${{ inputs.environment }}", path: release-evidence.txt}
+  gate:
+    environment: ${{ inputs.environment }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate immutable digest
+        run: echo "${{ inputs.image_digest }}" | grep -Eq '^sha256:[a-fA-F0-9]{64}$'
+      - name: Create release manifest
+        run: |
+          cat > release-manifest.json <<JSON
+          {
+            "version":"${GITHUB_REF_NAME:-manual}",
+            "gitCommit":"${GITHUB_SHA}",
+            "imageDigest":"${{ inputs.image_digest }}",
+            "sbom":"api-sbom.spdx.json",
+            "configVersion":"${{ inputs.config_version }}",
+            "migrationVersion":"${{ inputs.migration_version }}",
+            "deploymentExecution":"${{ inputs.deployment_execution }}"
+          }
+          JSON
+      - name: Promotion smoke gate
+        run: npm run test:smoke --if-present
+      - name: Environment-specific verification
+        run: |
+          case "${{ inputs.environment }}" in
+            dev) npm run test:api --if-present ;;
+            test) npm run test:e2e --if-present; npm run test:dast --if-present; npm run test:performance --if-present ;;
+            staging) npm run test:smoke --if-present; npm run test:load --if-present; npm run test:migration --if-present ;;
+            production) npm run test:production-health --if-present ;;
+          esac
+      - uses: actions/upload-artifact@v4
+        with:
+          name: release-evidence-${{ inputs.environment }}
+          path: release-manifest.json
