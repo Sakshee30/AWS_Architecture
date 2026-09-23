@@ -1,15 +1,15 @@
 # Sections 16–30 integration gap matrix against Boby-Mourya/AWS
 
-Reference snapshot reviewed: teammate repository main.
+Reference: teammate main architecture and contracts.
 
-| Area | Teammate 1–15 contract | Sections 16–30 integration |
+| Area | Teammate 1–15 | Sections 16–30 alignment |
 |---|---|---|
-| Desired state | packages/config-engine + validatePlatformState | local compatibility contract mirrors the teammate shape; Section 19 imports the same module path |
-| Policy | packages/policy-engine + locked capabilities/change approval | local compatibility contract mirrors policy semantics; Section 19 uses evaluatePlatformPolicy |
-| Control API | Fastify, authenticated operator, change state machine | Section 19 remains repository-backed/change-oriented and can be registered into the existing Fastify composition root |
-| Capability contracts | cache/event/queue/storage/search/secret/AI ports | Sections 16–30 never put optional provider SDKs into domain code |
-| Fallbacks | Redis→memory/Postgres, Kafka→outbox, OpenSearch→Postgres, AI degraded | readiness/DoD and operational controls require the same fallbacks |
-| CI/testing | root typecheck/tests/architecture tests | integration workflow runs static Section 16–30 checks now and root npm tests once the 1–15 workspace is merged |
-| Production safety | locked capabilities, approval, non-destructive change semantics | Section 19/25/30 enforce approval, health, audit and rollback requirements |
+| Desired state | config-engine DesiredState + validateDesiredState/validatePlatformState | same capability names, provider catalog, required fallback and locked logging/database rules |
+| Dependency validation | Redis/BullMQ, RAG and provider prerequisites | mirrored fail-fast dependency checks; destructive/provider changes remain policy-controlled |
+| Switch workflows | Redis off, Kafka off, OpenSearch off, EKS→ECS, AI changes | same non-destructive workflow sequencing, fallbacks, health gates and rollback semantics |
+| Policy | locked capabilities, privileged roles, production approval | same locked production capability set and risk-aware approval semantics |
+| Control API | Fastify change-oriented control plane | Section 19 APIs remain change-oriented and forbid provider-specific destructive routes |
+| Architecture | ports/adapters/provider registry | optional infrastructure stays outside business/domain code |
+| CI/testing | root typecheck/tests plus architecture tests | integration workflow runs Sections 16–30 validators and defers teammate root workspace execution until merge |
 
-No duplicate business-domain implementation is introduced. These compatibility modules exist only so this repository can typecheck Section 19 before the teammate's full workspace is merged; when the full 1–15 packages are merged, identical package paths remain the integration seam.
+No business-domain feature from Sections 1–15 is duplicated here. Compatibility code is limited to integration seams needed for Sections 16–30 to compile and preserve the same pipeline before the repositories are combined.

@@ -1,7 +1,9 @@
-export type Environment='development'|'testing'|'staging'|'production';
+export type SwitchClass='runtime'|'application-provider'|'infrastructure'|'compute-migration'|'locked';
+export type SwitchRisk='GREEN'|'BLUE'|'AMBER'|'RED'|'LOCKED';
 export interface CapabilitySelection{enabled:boolean;provider:string;fallback?:string;required?:boolean}
 export interface DesiredState{
   platform:{
+    profile:string;
     database:CapabilitySelection;
     cache:CapabilitySelection;
     distributed_lock:CapabilitySelection;
@@ -14,5 +16,6 @@ export interface DesiredState{
     ai:CapabilitySelection;
     observability:{metrics:boolean;tracing:boolean;logging:boolean};
   };
-  features:{rag:boolean;whatsapp?:boolean;analytics?:boolean;workflow?:boolean};
+  features:Record<string,boolean>;
+  limits?:Record<string,number>;
 }
