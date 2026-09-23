@@ -1,0 +1,5 @@
+# Sensitive platform areas require explicit ownership.
+/infrastructure/ @Sakshee30
+/.github/workflows/ @Sakshee30
+/apps/platform-control-api/ @Sakshee30
+/packages/security/ @Sakshee30
