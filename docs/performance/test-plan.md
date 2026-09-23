@@ -1,0 +1,2 @@
+# Performance/capacity plan
+Execute normal, peak, 2x peak, spike, soak and failure-injection profiles. Capture P50/P95/P99, throughput/errors/saturation and detect N+1 queries, full scans, missing indexes, unbounded pagination, huge payloads/joins and memory growth. Track RDS, NAT, MSK, OpenSearch, EKS, GPU, S3, transfer, logs and AI inference costs with Application/Environment/Service/Owner/CostCenter tags.
