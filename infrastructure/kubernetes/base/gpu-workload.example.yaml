@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ai-gpu-worker
+  namespace: workers
+spec:
+  replicas: 0
+  selector:
+    matchLabels:
+      app: ai-gpu-worker
+  template:
+    metadata:
+      labels:
+        app: ai-gpu-worker
+    spec:
+      nodeSelector:
+        workload: gpu
+      tolerations:
+      - key: nvidia.com/gpu
+        operator: Exists
+        effect: NoSchedule
+      containers:
+      - name: worker
+        image: REPLACE_WITH_IMMUTABLE_DIGEST
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop: ["ALL"]
+        resources:
+          limits:
+            nvidia.com/gpu: "1"
