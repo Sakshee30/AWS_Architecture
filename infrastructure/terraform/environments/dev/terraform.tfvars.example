@@ -2,10 +2,25 @@ application_name = "platform"
 owner = "platform-team"
 cost_center = "engineering"
 audit_bucket_name = "REPLACE-WITH-GLOBALLY-UNIQUE-AUDIT-BUCKET"
+
 non_secret_parameters = {
- "/platform/dev/log-level" = "INFO"
+  "/platform/dev/log-level" = "INFO"
 }
+
 secret_names = [
- "platform/dev/database",
- "platform/dev/external-api"
+  "platform/dev/database",
+  "platform/dev/external-api"
 ]
+
+secret_rotation = {}
+
+initial_configuration = {
+  version = 1
+  capabilities = {
+    cache = {
+      enabled  = false
+      provider = "none"
+      fallback = "memory"
+    }
+  }
+}
