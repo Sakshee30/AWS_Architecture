@@ -6,4 +6,10 @@ limits:
   request_timeout_ms: 15000
   max_batch_size: 100
   worker_concurrency: 20
-performance_profiles: [normal, peak, 2x_peak, spike, soak, failure_injection]
+performance_profiles:
+  - normal
+  - peak
+  - 2x_peak
+  - spike
+  - soak
+  - failure_injection
