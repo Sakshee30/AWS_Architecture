@@ -143,3 +143,34 @@ module "eks" {
   enable_gpu_nodes = var.enable_gpu_nodes
   tags = var.tags
 }
+
+
+module "waf" {
+  source = "../waf"
+  name   = local.name
+  scope  = "REGIONAL"
+  tags   = var.tags
+}
+
+module "vpc_endpoints" {
+  count               = var.enable_vpc_endpoints ? 1 : 0
+  source              = "../vpc-endpoints"
+  vpc_id              = module.vpc.vpc_id
+  region              = var.aws_region
+  route_table_ids     = []
+  subnet_ids          = module.vpc.private_app_subnet_ids
+  security_group_ids  = [aws_security_group.app.id]
+  enable_interface_endpoints = true
+  tags                = var.tags
+}
+
+module "cloudfront" {
+  source                  = "../cloudfront"
+  enabled                 = var.enable_cloudfront && var.enable_alb
+  name                    = local.name
+  origin_domain_name      = module.alb.dns_name
+  web_acl_id              = null
+  certificate_arn         = var.cloudfront_certificate_arn
+  aliases                 = var.cloudfront_aliases
+  tags                    = var.tags
+}

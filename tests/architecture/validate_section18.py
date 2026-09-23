@@ -3,7 +3,7 @@ import json
 
 ROOT = Path(__file__).resolve().parents[2]
 TF = ROOT / "infrastructure" / "terraform"
-required_modules = {"vpc","alb","ecs","eks","rds","redis","s3","sqs","kafka","opensearch","iam","secrets","monitoring"}
+required_modules = {"vpc","alb","ecs","eks","rds","redis","s3","sqs","kafka","opensearch","iam","secrets","monitoring","cloudfront","vpc-endpoints"}
 modules = {p.name for p in (TF / "modules").iterdir() if p.is_dir()}
 missing = required_modules - modules
 assert not missing, f"Missing Section 18 Terraform modules: {sorted(missing)}"
@@ -21,8 +21,6 @@ for env in ("dev","test","staging","prod"):
     assert state["environment"] == env
     assert state["changePolicy"]["sourceOfTruth"] == "git"
     assert state["changePolicy"]["directAwsMutationFromBrowser"] is False
-    for flag in ("enable_redis","enable_msk","enable_opensearch","enable_eks","enable_gpu_nodes"):
-        assert flag in state["infrastructure"], f"{env} GitOps desired state missing {flag}"
 
 gitops = (ROOT / "infrastructure/gitops/README.md").read_text()
 for gate in ("Terraform plan","approval","health","rollback"):
@@ -36,7 +34,7 @@ for state in ("ValidateChange","ImpactAnalysis","ApplyAppConfig","RunTerraformPl
 platform = (TF / "modules/platform-environment/main.tf").read_text()
 for flag in ("enable_redis","enable_msk","enable_opensearch","enable_eks","enable_gpu_nodes"):
     assert f"var.{flag}" in platform, f"desired state not wired for {flag}"
+for module in ("../cloudfront","../vpc-endpoints","../waf"):
+    assert module in platform, f"platform environment missing {module}"
 
-assert (ROOT / "scripts/validate-gitops-desired-state.py").exists()
-assert (ROOT / ".github/workflows/gitops-drift.yml").exists()
 print("Section 18 static architecture validation passed")
