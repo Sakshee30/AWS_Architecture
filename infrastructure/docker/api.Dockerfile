@@ -16,7 +16,7 @@ ENV NODE_ENV=production
 RUN addgroup -S app -g 10001 && adduser -S app -G app -u 10001
 WORKDIR /app
 COPY --from=build --chown=10001:10001 /app ./
-RUN rm -rf /root/.npm /usr/local/lib/node_modules/npm/node_modules/tar
+RUN rm -rf /root/.npm /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
 USER 10001:10001
 EXPOSE 8080
 STOPSIGNAL SIGTERM
