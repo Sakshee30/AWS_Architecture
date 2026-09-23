@@ -1,0 +1,38 @@
+name: Section 18 IaC Validation
+
+on:
+  pull_request:
+    paths:
+      - "infrastructure/**"
+      - "tests/architecture/validate_section18.py"
+      - ".github/workflows/section18-iac.yml"
+  push:
+    branches: [main]
+    paths:
+      - "infrastructure/**"
+      - "tests/architecture/validate_section18.py"
+      - ".github/workflows/section18-iac.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  static-and-terraform:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.8
+      - name: Static architecture validation
+        run: python tests/architecture/validate_section18.py
+      - name: Terraform format
+        run: terraform fmt -check -recursive infrastructure/terraform
+      - name: Terraform validate environments
+        shell: bash
+        run: |
+          set -euo pipefail
+          for env in dev test staging prod; do
+            terraform -chdir="infrastructure/terraform/environments/$env" init -backend=false -input=false
+            terraform -chdir="infrastructure/terraform/environments/$env" validate
+          done
