@@ -1,19 +1,25 @@
 # Section 16 acceptance evidence
 
 Implemented:
-- AppConfig application/environment/hosted configuration/deployment baseline.
+- AWS AppConfig application/environment/hosted configuration with progressive deployment strategy support.
+- Runtime desired-state payload for capability enabled/provider/fallback selections.
 - SSM Parameter Store module restricted to non-secret String parameters.
 - Secrets Manager containers without accepting plaintext secret values.
+- Optional Secrets Manager rotation configuration via rotation Lambda ARN and rotation interval.
+- Secret outputs expose metadata only (ARN, name, rotation configured), never secret values.
 - KMS key with rotation and alias.
 - Multi-region CloudTrail with log-file validation.
-- AWS Config recorder/delivery channel.
+- AWS Config recorder/delivery channel for configuration history/drift evidence.
 - Encrypted, versioned, public-blocked audit bucket.
-- DEV composition and mandatory resource tags.
+- DEV environment composition and mandatory AWS resource tags.
 - Architecture tests preventing AWS SDK coupling in domain/application and plaintext secret inputs.
 - Terraform state/secrets exclusions in .gitignore.
 
-Pending integration evidence:
-- CI execution of terraform fmt/validate/plan and pytest requires the teammate's shared CI/runtime foundation or a later Section 21 pipeline.
-- Production secret population/rotation is an operational deployment concern; no plaintext values are committed.
+Acceptance still requires runtime evidence:
+- terraform fmt -check -recursive
+- terraform init/validate for environment compositions
+- pytest execution of architecture tests
+- terraform plan against an authorized AWS test account
+- deployment evidence proving AppConfig rollout, secret metadata-only exposure, CloudTrail/AWS Config evidence and rollback behavior
 
-Do not expose plaintext secrets in control-plane APIs, logs, UI or audit events.
+The master specification explicitly says not to claim completion without tests/deployment evidence. No plaintext production secret values are committed.
