@@ -1,11 +1,31 @@
 {
   "name": "pluggable-aws-platform",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
+  "type": "module",
+  "engines": {
+    "node": ">=22.0.0"
+  },
   "workspaces": ["apps/*", "services/*", "packages/*", "adapters/*"],
   "scripts": {
+    "build": "npm run build:server && npm run build:web && npm run build:platform-admin",
+    "build:server": "tsc -p tsconfig.build.json",
+    "build:web": "npm run build --workspace @platform/web",
+    "build:platform-admin": "npm run build --workspace @platform/platform-admin",
     "test": "tsx --test tests/**/*.test.mjs tests/**/*.test.ts",
-    "test:architecture": "node --test tests/architecture/*.test.mjs",
+    "test:unit": "tsx --test tests/capability-container.test.ts tests/config-validation.test.ts tests/dependency-policy.test.ts tests/event-schema.test.ts tests/cache-worker-hardening.test.ts",
+    "test:integration": "tsx --test tests/*adapter*.test.ts tests/object-storage-search-ai.test.ts tests/postgres-schema.test.mjs",
+    "test:contract": "tsx --test tests/provider-contracts.test.mjs tests/platform-control-api.test.ts",
+    "test:e2e": "tsx --test tests/switch-workflows.test.ts tests/web-session.test.ts",
+    "test:security": "tsx --test tests/security-tenant-isolation.test.ts tests/frontend-security.test.mjs tests/control-production-guardrails.test.mjs",
+    "test:performance": "tsx --test tests/performance-contract.test.ts",
+    "test:resilience": "tsx --test tests/cache-worker-hardening.test.ts tests/event-worker.test.ts tests/object-storage-search-ai.test.ts",
+    "test:chaos": "tsx --test tests/failure-injection.test.ts",
+    "test:backup-restore": "tsx --test tests/backup-restore-contract.test.ts",
+    "test:migration": "tsx --test tests/postgres-schema.test.mjs tests/control-store-migration.test.ts",
+    "test:control-plane": "tsx --test tests/platform-control-api.test.ts tests/control-change-machine.test.ts",
+    "test:architecture": "python tests/architecture/forbidden_imports.py",
+    "test:smoke": "tsx --test tests/config-validation.test.ts tests/platform-control-api.test.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "devDependencies": {
