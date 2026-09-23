@@ -13,6 +13,10 @@ spec:
       labels:
         app: ai-gpu-worker
     spec:
+      securityContext:
+        runAsNonRoot: true
+        seccompProfile:
+          type: RuntimeDefault
       nodeSelector:
         workload: gpu
       tolerations:
@@ -23,6 +27,7 @@ spec:
       - name: worker
         image: REPLACE_WITH_IMMUTABLE_DIGEST
         securityContext:
+          runAsNonRoot: true
           allowPrivilegeEscalation: false
           readOnlyRootFilesystem: true
           capabilities:

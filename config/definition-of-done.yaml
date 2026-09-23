@@ -1,16 +1,51 @@
 criteria:
- architecture: "no optional infrastructure SDK imports in domain; architecture tests pass"
- configuration: "schema-valid provider/capability combinations; fail before production impact"
- redis_off: "supported requests continue using approved fallbacks"
- kafka_off: "outbox retains events; alternate delivery; idempotent consumers"
- search_off: "PostgreSQL fallback functional at documented limits"
- ai_off: "non-AI platform operational; AI UI/actions disabled cleanly"
- compute_portability: "same immutable images in supported Docker/ECS/EKS profiles"
- control_panel: "desired/actual/health/fallback/dependencies/cost-impact/version/history visible"
- production_changes: "high risk requires validation/approval/verification/rollback"
- security: "no plaintext prod secrets; least privilege; WAF/TLS/auth/tenant isolation/scans"
- observability: "correlation IDs plus metrics/logs/traces; alerts/runbooks"
- resilience: "failure tests prove safe degradation/controlled failure"
- backup_dr: "restore tests meet RPO/RTO or gaps recorded"
- cicd: "protected main plus tests/scans/image scan/SBOM/signing/promotion"
- documentation: "architecture/provider matrix/runbooks/change procedures current"
+  architecture:
+    requirement: "Business/domain code contains no direct optional infrastructure SDK imports; architecture tests pass."
+    evidence: ["tests/architecture/forbidden_imports.py","tests/architecture/validate_section26.py"]
+  configuration:
+    requirement: "All provider/capability configuration validates against schema; invalid combinations fail before production impact."
+    evidence: ["packages/config-engine/src/validate.ts","packages/config-engine/src/validate-all.ts"]
+  redis_off:
+    requirement: "Supported requests continue; cache, lock, idempotency, session and queue dependencies use approved fallbacks."
+    evidence: ["packages/config-engine/src/workflows.ts"]
+  kafka_off:
+    requirement: "No event loss; outbox persists events; alternate delivery works; consumers remain idempotent."
+    evidence: ["packages/config-engine/src/workflows.ts","docs/reliability/failure-matrix.md"]
+  search_off:
+    requirement: "Core search remains functional through PostgreSQL fallback at documented limits."
+    evidence: ["packages/config-engine/src/workflows.ts"]
+  ai_off:
+    requirement: "Non-AI platform remains operational; AI UI/actions are disabled cleanly."
+    evidence: ["packages/config-engine/src/workflows.ts"]
+  compute_portability:
+    requirement: "The same immutable application images run in local Docker, ECS and EKS-compatible modes where supported."
+    evidence: ["infrastructure/docker","infrastructure/compose","infrastructure/kubernetes",".github/workflows/build-release.yml"]
+  control_panel:
+    requirement: "Shows desired state, actual state, health, fallback, dependencies, cost/impact, version and change history."
+    evidence: ["apps/platform-control-api/src/section19","packages/platform-sdk/src/cost-impact.ts"]
+  production_changes:
+    requirement: "High-risk production switches require validation, approval, deployment verification and rollback path."
+    evidence: ["packages/policy-engine/src/index.ts","infrastructure/step-functions/change-orchestrator.asl.json"]
+  security:
+    requirement: "No plaintext production secrets; least privilege; WAF/TLS; authn/authz; tenant isolation; scanning gates pass."
+    evidence: ["packages/security","infrastructure/terraform/modules/waf",".github/workflows/security-gates.yml"]
+  observability:
+    requirement: "Critical requests/jobs/events have correlation IDs and metrics/logs/traces; alerts and runbooks exist."
+    evidence: ["packages/observability/src/index.ts","config/slos.yaml","docs/runbooks"]
+  resilience:
+    requirement: "Failure-mode tests prove graceful degradation or controlled failure without data corruption."
+    evidence: ["packages/platform-sdk/src/resilience.ts","docs/reliability/failure-matrix.md"]
+  backup_dr:
+    requirement: "Restore tests succeed and documented RPO/RTO targets are met or gaps are explicitly recorded."
+    evidence: ["config/dr.yaml","docs/runbooks/disaster-recovery.md"]
+  cicd:
+    requirement: "Main is protected; tests/security scans/image scan/SBOM/signing/promotion gates execute successfully."
+    evidence: [".github/workflows/pr-quality-security.yml",".github/workflows/build-release.yml",".github/workflows/promote.yml"]
+  documentation:
+    requirement: "Architecture, provider matrix, operational runbooks and change procedures are current."
+    evidence: ["docs/implementation/phase-map.md","docs/reliability/failure-matrix.md","docs/runbooks","AGENTS.md"]
+
+policy:
+  source_implementation_can_pass_without_runtime_evidence: false
+  production_ready_requires_all_runtime_evidence: true
+  missing_evidence_is_failure: true

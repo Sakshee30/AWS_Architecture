@@ -13,7 +13,10 @@ resource "aws_opensearch_domain" "this" {
     security_group_ids = var.security_group_ids
   }
 
-  encrypt_at_rest { enabled = true kms_key_id = var.kms_key_id }
+  encrypt_at_rest {
+    enabled    = true
+    kms_key_id = var.kms_key_id
+  }
   node_to_node_encryption { enabled = true }
   domain_endpoint_options {
     enforce_https       = true

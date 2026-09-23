@@ -1,0 +1,20 @@
+name: Release Policy
+on:
+  pull_request:
+  push:
+    tags: ["v*"]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate release controls
+        run: |
+          test -f .github/CODEOWNERS
+          test -f CHANGELOG.md
+          test -f docs/release/release-manifest.schema.json
+          if [[ "${GITHUB_REF_TYPE}" == "tag" ]]; then
+            echo "${GITHUB_REF_NAME}" | grep -Eq '^v[0-9]+\.[0-9]+\.[0-9]+([+-][0-9A-Za-z.-]+)?$'
+          fi

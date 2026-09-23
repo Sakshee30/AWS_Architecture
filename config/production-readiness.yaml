@@ -1,18 +1,54 @@
 checks:
- - authentication_mfa_authorization
- - tenant_isolation_all_boundaries
- - versioned_forward_compatible_migrations
- - optional_provider_fallbacks
- - outbox_inbox_idempotency
- - queue_retry_dlq_alert_replay
- - s3_quarantine_security
- - non_root_container_and_vulnerability_scan
- - reproducible_iac_and_drift_detection
- - approved_secret_stores_only
- - otel_logs_metrics_traces_redaction
- - slos_alerts_dashboards_runbooks
- - backup_restore_tests
- - load_security_chaos_tests
- - control_plane_approval_health_rollback
- - release_traceability
-evidence_required: true
+  authentication_mfa_authorization:
+    description: "Authentication, MFA for privileged roles and server-side authorization are enforced."
+    evidence_required: true
+  tenant_isolation_all_boundaries:
+    description: "Tenant isolation tests pass for database, cache, storage, queues, events, vectors and AI context."
+    evidence_required: true
+  versioned_forward_compatible_migrations:
+    description: "Database migrations are versioned, reversible/forward-compatible and tested."
+    evidence_required: true
+  optional_provider_fallbacks:
+    description: "Redis/Kafka/OpenSearch/AI optional paths have tested fallback or explicit disabled behavior."
+    evidence_required: true
+  outbox_inbox_idempotency:
+    description: "Critical async workflows use outbox/inbox/idempotency."
+    evidence_required: true
+  queue_retry_dlq_alert_replay:
+    description: "Queues have retry, DLQ, alerting and replay tooling."
+    evidence_required: true
+  s3_quarantine_security:
+    description: "S3 uploads use quarantine and security validation."
+    evidence_required: true
+  non_root_container_and_vulnerability_scan:
+    description: "Containers run non-root and pass vulnerability scanning."
+    evidence_required: true
+  reproducible_iac_and_drift_detection:
+    description: "IaC reproduces environments and manual production drift is not silently accepted."
+    evidence_required: true
+  approved_secret_stores_only:
+    description: "Production secret values exist only in approved secret stores."
+    evidence_required: true
+  otel_logs_metrics_traces_redaction:
+    description: "OpenTelemetry/logging/metrics/traces are deployed with redaction."
+    evidence_required: true
+  slos_alerts_dashboards_runbooks:
+    description: "SLOs, alerts, dashboards and runbooks exist."
+    evidence_required: true
+  backup_restore_tests:
+    description: "Backup and restore tests are completed."
+    evidence_required: true
+  load_security_chaos_tests:
+    description: "Load, security and chaos tests are completed for critical paths."
+    evidence_required: true
+  control_plane_approval_health_rollback:
+    description: "Production control-plane changes use approval, health verification and rollback."
+    evidence_required: true
+  release_traceability:
+    description: "Git, image, configuration and migration versions are traceable per release."
+    evidence_required: true
+
+policy:
+  fail_closed: true
+  code_presence_is_not_evidence: true
+  all_checks_required_for_ready: true

@@ -12,5 +12,5 @@ enable_opensearch=false
 enable_eks=false
 enable_ecs=true
 enable_gpu_nodes=false
-enable_alb=false
+enable_alb=true
 container_image="REPLACE_WITH_ECR_REPOSITORY@sha256:REPLACE_WITH_64_HEX_DIGEST"

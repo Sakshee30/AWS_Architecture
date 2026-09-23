@@ -1,5 +1,64 @@
 slos:
-  api_availability: {target: 99.9, window: 30d, owner: sre, severity: critical, runbook: docs/runbooks/api-slo.md}
-  api_latency_p95: {target_ms: 500, window: 30d, owner: api, severity: high, runbook: docs/runbooks/api-slo.md}
-  queue_age: {target_seconds: 120, owner: workers, severity: high, runbook: docs/runbooks/queue.md}
-  dlq_growth: {target: 0, owner: workers, severity: high, runbook: docs/runbooks/queue.md}
+  api_availability:
+    indicator: availability
+    target: 99.9
+    window: 30d
+    owner: sre
+    severity: critical
+    dashboard: platform-api
+    escalation: on-call
+    runbook: docs/runbooks/api-slo.md
+  api_latency_p95:
+    indicator: latency_p95
+    target_ms: 500
+    window: 30d
+    owner: api
+    severity: high
+    dashboard: platform-api
+    escalation: api-on-call
+    runbook: docs/runbooks/api-slo.md
+  queue_age:
+    indicator: queue_age
+    target_seconds: 120
+    window: 1h
+    owner: workers
+    severity: high
+    dashboard: platform-workers
+    escalation: workers-on-call
+    runbook: docs/runbooks/queue.md
+  dlq_growth:
+    indicator: dlq_growth
+    target: 0
+    window: 1h
+    owner: workers
+    severity: high
+    dashboard: platform-workers
+    escalation: workers-on-call
+    runbook: docs/runbooks/queue.md
+  database_failure:
+    indicator: database_failure
+    target: 0
+    window: 5m
+    owner: database
+    severity: critical
+    dashboard: platform-database
+    escalation: database-on-call
+    runbook: docs/runbooks/database.md
+  dependency_failure:
+    indicator: dependency_failure
+    target: 0
+    window: 5m
+    owner: sre
+    severity: high
+    dashboard: platform-dependencies
+    escalation: on-call
+    runbook: docs/runbooks/dependency.md
+  security_events:
+    indicator: security_event
+    target: 0
+    window: 5m
+    owner: security
+    severity: critical
+    dashboard: platform-security
+    escalation: security-on-call
+    runbook: docs/runbooks/security.md

@@ -7,4 +7,7 @@ variable "parameters" {
   error_message = "Secret-looking parameter names are forbidden. Use Secrets Manager."
  }
 }
-variable "tags" { type = map(string) default = {} }
+variable "tags" {
+  type = map(string)
+  default = {}
+}

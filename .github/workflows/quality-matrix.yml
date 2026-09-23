@@ -1,16 +1,46 @@
 name: Quality Matrix
-on: {pull_request: {}, workflow_dispatch: {}}
-permissions: {contents: read}
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
 jobs:
- architecture:
-  runs-on: ubuntu-latest
-  steps:
-   - uses: actions/checkout@v4
-   - run: python tests/architecture/forbidden_imports.py
-   - run: for f in tests/architecture/validate_section*.py; do python "$f"; done
- evidence:
-  runs-on: ubuntu-latest
-  strategy: {matrix: {gate: [unit, integration, contract, e2e, security, performance, resilience, migration, control-plane]}}
-  steps:
-   - uses: actions/checkout@v4
-   - run: echo "Gate ${{ matrix.gate }} requires repository-specific execution evidence before production."
+  architecture:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: python tests/architecture/forbidden_imports.py
+      - run: for f in tests/architecture/validate_section*.py; do python "$f"; done
+  test-matrix:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        gate: [unit, integration, contract, e2e, security, performance, resilience, chaos, backup-restore, migration, control-plane]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        if: ${{ hashFiles('package-lock.json') != '' }}
+        with: {node-version: "22"}
+      - name: Install workspace when lockfile exists
+        if: ${{ hashFiles('package-lock.json') != '' }}
+        run: npm ci
+      - name: Execute gate when workspace is present
+        if: ${{ hashFiles('package-lock.json') != '' }}
+        run: |
+          case "${{ matrix.gate }}" in
+            unit) npm run test:unit --if-present ;;
+            integration) npm run test:integration --if-present ;;
+            contract) npm run test:contract --if-present ;;
+            e2e) npm run test:e2e --if-present ;;
+            security) npm run test:security --if-present ;;
+            performance) npm run test:performance --if-present ;;
+            resilience) npm run test:resilience --if-present ;;
+            chaos) npm run test:chaos --if-present ;;
+            backup-restore) npm run test:backup-restore --if-present ;;
+            migration) npm run test:migration --if-present ;;
+            control-plane) npm run test:control-plane --if-present ;;
+          esac
+      - name: Record integration dependency
+        if: ${{ hashFiles('package-lock.json') == '' }}
+        run: echo "Root Sections 1-15 workspace/lockfile not merged yet; runtime gate remains evidence-pending."
