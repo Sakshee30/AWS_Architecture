@@ -1,3 +1,13 @@
+# Central limits used by Sections 1-30. Legacy camelCase limits are preserved for Sections 1-15 consumers.
+defaults:
+  apiRequestsPerMinute: 120
+  uploadMegabytes: 25
+  aiTokensPerRequest: 4096
+production:
+  apiRequestsPerMinute: 600
+  uploadMegabytes: 100
+  aiTokensPerRequest: 8192
+
 limits:
   max_request_bytes: 10485760
   max_upload_bytes: 104857600
@@ -6,6 +16,7 @@ limits:
   request_timeout_ms: 15000
   max_batch_size: 100
   worker_concurrency: 20
+
 performance_profiles:
   - normal
   - peak
