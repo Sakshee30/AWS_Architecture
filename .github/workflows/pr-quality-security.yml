@@ -51,7 +51,7 @@ jobs:
       - uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - uses: aquasecurity/trivy-action@0.28.0
+      - uses: aquasecurity/trivy-action@v0.36.0
         with: {scan-type: fs, scan-ref: ".", format: table, exit-code: "1", severity: "HIGH,CRITICAL"}
   sast:
     runs-on: ubuntu-latest
@@ -64,6 +64,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: aquasecurity/trivy-action@0.28.0
+      - uses: aquasecurity/trivy-action@v0.36.0
         with: {scan-type: config, scan-ref: infrastructure, format: table, exit-code: "1", severity: "HIGH,CRITICAL"}
       - run: docker build -f infrastructure/docker/api.Dockerfile -t section21-pr-api:${GITHUB_SHA} .
