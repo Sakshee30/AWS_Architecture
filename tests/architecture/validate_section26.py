@@ -5,7 +5,10 @@ for f in required: assert (R/f).exists(),f
 policy=(R/'docs/testing/quality-gates.md').read_text().lower()
 for token in ['unit','integration','contract','architecture','e2e','security','performance','resilience','chaos','backup','migration','control plane']:
  assert token in policy,token
-forbidden=(R/'tests/architecture/forbidden_imports.py').read_text()
-for token in ['redis','kafka','aws-sdk','frontend cannot import database packages']:
- assert token.lower() in forbidden.lower(),token
+forbidden=(R/'tests/architecture/forbidden_imports.py').read_text().lower()
+for token in ['redis','kafka','aws-sdk','frontend cannot import database packages','controllers cannot access orm directly','adapters/']:
+ assert token in forbidden,token
+wf=(R/'.github/workflows/quality-matrix.yml').read_text().lower()
+for token in ['chaos','backup-restore','test:unit','test:integration','test:contract','test:e2e','test:security','test:performance','test:resilience','test:chaos','test:backup-restore','test:migration','test:control-plane']:
+ assert token in wf,token
 print('Section 26 validation passed')

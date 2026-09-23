@@ -16,7 +16,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        gate: [unit, integration, contract, e2e, security, performance, resilience, migration, control-plane]
+        gate: [unit, integration, contract, e2e, security, performance, resilience, chaos, backup-restore, migration, control-plane]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -32,6 +32,8 @@ jobs:
             security) npm run test:security --if-present ;;
             performance) npm run test:performance --if-present ;;
             resilience) npm run test:resilience --if-present ;;
+            chaos) npm run test:chaos --if-present ;;
+            backup-restore) npm run test:backup-restore --if-present ;;
             migration) npm run test:migration --if-present ;;
             control-plane) npm run test:control-plane --if-present ;;
           esac
