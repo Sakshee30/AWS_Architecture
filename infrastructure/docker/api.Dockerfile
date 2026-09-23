@@ -9,6 +9,7 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build --if-present
+RUN npm prune --omit=dev
 
 FROM node:22.11.0-alpine3.20 AS runtime
 ENV NODE_ENV=production
