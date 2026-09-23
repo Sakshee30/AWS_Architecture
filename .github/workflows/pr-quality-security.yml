@@ -67,3 +67,7 @@ jobs:
       - uses: aquasecurity/trivy-action@v0.36.0
         with: {scan-type: config, scan-ref: infrastructure, format: table, exit-code: "1", severity: "HIGH,CRITICAL"}
       - run: docker build -f infrastructure/docker/api.Dockerfile -t section21-pr-api:${GITHUB_SHA} .
+        if: ${{ hashFiles('package.json') != '' }}
+      - name: Sections 1-15 application image pending integration
+        if: ${{ hashFiles('package.json') == '' }}
+        run: echo "Docker build is integration-gated until the Sections 1-15 application workspace is merged."

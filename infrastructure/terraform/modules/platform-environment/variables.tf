@@ -1,5 +1,11 @@
 variable "application_name" { type = string }
-variable "environment" { type = string validation { condition = contains(["dev","test","staging","prod"], var.environment) error_message = "environment must be dev, test, staging, or prod." } }
+variable "environment" {
+  type = string
+  validation {
+    condition     = contains(["dev", "test", "staging", "prod"], var.environment)
+    error_message = "environment must be dev, test, staging, or prod."
+  }
+}
 variable "aws_region" {
   type = string
   default = "ap-south-1"

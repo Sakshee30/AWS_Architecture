@@ -26,10 +26,11 @@ resource "aws_security_group" "app" {
   name_prefix = "${local.name}-app-"
   vpc_id = module.vpc.vpc_id
   egress {
+    description = "Secure default: VPC-local egress. Explicit external egress is added by environment policy."
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.vpc_cidr]
   }
   tags = var.tags
 }
@@ -72,10 +73,11 @@ resource "aws_security_group" "alb" {
     cidr_blocks = ["0.0.0.0/0"]
   }
   egress {
+    description = "Secure default: VPC-local egress. Explicit external egress is added by environment policy."
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
-    cidr_blocks = ["0.0.0.0/0"]
+    cidr_blocks = [var.vpc_cidr]
   }
   tags = var.tags
 }
