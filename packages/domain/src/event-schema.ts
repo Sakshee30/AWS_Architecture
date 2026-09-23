@@ -1,4 +1,5 @@
-import Ajv2020 from 'ajv/dist/2020.js';
+import AjvModule from 'ajv/dist/2020.js';
+const Ajv2020 = (AjvModule as unknown as {default?: typeof AjvModule}).default ?? AjvModule;
 import type { AnySchema, ValidateFunction } from 'ajv';
 import type { DomainEvent } from './index.js';
 

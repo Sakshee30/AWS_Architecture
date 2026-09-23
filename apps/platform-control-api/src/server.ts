@@ -18,7 +18,7 @@ const pages=new Set<ControlPage>(['overview','capabilities','features','provider
 const approvedMutationStates=new Set<ChangeState>(['APPROVED','PROVISIONING','DEPLOYING','VERIFYING','STABILIZING','COMPLETED']);
 
 app.addHook('onRequest',async(request)=>{if(request.url.split('?')[0]==='/health')return;request.operator=await authenticateControlOperator(request.headers.authorization)});
-app.setErrorHandler((error,request,reply)=>{const status=(error as {statusCode?:number}).statusCode??500;const code=(error as {code?:string}).code??(status>=500?'INTERNAL_ERROR':'CONTROL_REQUEST_REJECTED');if(status>=500)request.log.error({err:error},'control request failed');return reply.code(status).send({error:{code,message:status>=500?'Control-plane request failed':error.message,requestId:request.id}})});
+app.setErrorHandler((error,request,reply)=>{const status=(error as {statusCode?:number}).statusCode??500;const code=(error as {code?:string}).code??(status>=500?'INTERNAL_ERROR':'CONTROL_REQUEST_REJECTED');if(status>=500)request.log.error({err:error},'control request failed');return reply.code(status).send({error:{code,message:status>=500?'Control-plane request failed':(error instanceof Error?error.message:'Control request rejected'),requestId:request.id}})});
 
 app.get('/health',async()=>({status:'HEALTHY',service:'platform-control-api'}));
 app.get('/v1/control/overview',async()=>({environment,region,configVersion:store.getConfigVersion(),...store.getPage('overview').data,updatedAt:store.getPage('overview').updatedAt}));

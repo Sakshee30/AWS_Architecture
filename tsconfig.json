@@ -11,10 +11,26 @@
     "noUncheckedIndexedAccess": true,
     "baseUrl": ".",
     "paths": {
-      "@platform/domain": ["packages/domain/src/index.ts"],
-      "@platform/contracts": ["packages/contracts/src/index.ts"],
-      "@platform/*": ["packages/*/src/index.ts"]
-    }
+      "@platform/domain": [
+        "packages/domain/src/index.ts"
+      ],
+      "@platform/contracts": [
+        "packages/contracts/src/index.ts"
+      ],
+      "@platform/*": [
+        "packages/*/src/index.ts"
+      ]
+    },
+    "jsx": "react-jsx",
+    "allowImportingTsExtensions": true,
+    "moduleDetection": "force"
   },
-  "include": ["apps/**/*.ts", "apps/**/*.tsx", "services/**/*.ts", "packages/**/*.ts", "adapters/**/*.ts", "tests/**/*.ts"]
+  "include": [
+    "apps/**/*.ts",
+    "apps/**/*.tsx",
+    "services/**/*.ts",
+    "packages/**/*.ts",
+    "adapters/**/*.ts",
+    "tests/**/*.ts"
+  ]
 }
