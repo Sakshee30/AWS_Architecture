@@ -1,0 +1,2 @@
+# KMS module
+Provision scoped encryption keys/aliases and least-privilege key policies for approved platform data services. Separate administration from usage permissions and enable rotation where supported.
