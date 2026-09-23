@@ -1,6 +1,6 @@
 # Section 20 acceptance — Cybersecurity Architecture
-Status: IMPLEMENTED / SECURITY EXECUTION EVIDENCE PENDING
+Status: IMPLEMENTED / SECURITY VALIDATION PENDING
 
-Added WAF managed/rate rules, webhook signature/timestamp/replay validation, outbound URL/SSRF guard, hardened response headers/error envelope, cybersecurity baseline and STRIDE abuse-case model. Existing network modules keep application/data tiers private/isolated and secrets behind approved AWS services.
+Implemented reusable application security controls (HSTS/CSP/security headers, SSRF/outbound URL guard, signed-webhook timestamp/signature replay guard, structured sensitive-data redaction), AWS WAF managed-rule/rate-limit module, mandatory STRIDE abuse-case baseline, secret scanning and IaC security scanning workflow, plus static architecture validation.
 
-Production acceptance additionally requires executed SAST/SCA/secret/IaC/container scans and penetration/security tests; those gates are wired in Section 21.
+Existing Sections 16–18 provide KMS, Secrets Manager, private/isolated subnet patterns and least-privilege IAM foundations. Production acceptance additionally requires deployed WAF/edge evidence, SAST/SCA/DAST/container scan evidence, penetration/cross-tenant tests and workload-specific threat-model signoff.
