@@ -9,13 +9,14 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npm run build --if-present
-RUN npm prune --omit=dev
+RUN npm prune --omit=dev && npm cache clean --force
 
 FROM node:22.20.0-alpine3.22 AS runtime
 ENV NODE_ENV=production
 RUN addgroup -S app -g 10001 && adduser -S app -G app -u 10001
 WORKDIR /app
 COPY --from=build --chown=10001:10001 /app ./
+RUN rm -rf /root/.npm /usr/local/lib/node_modules/npm/node_modules/tar
 USER 10001:10001
 EXPOSE 8080
 STOPSIGNAL SIGTERM
