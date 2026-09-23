@@ -46,7 +46,10 @@ resource "aws_iam_role" "config" {
  name = "${var.name}-config"
  assume_role_policy = jsonencode({Version="2012-10-17",Statement=[{Effect="Allow",Principal={Service="config.amazonaws.com"},Action="sts:AssumeRole"}]})
 }
-resource "aws_iam_role_policy_attachment" "config" { role=aws_iam_role.config.name policy_arn="arn:aws:iam::aws:policy/service-role/AWS_ConfigRole" }
+resource "aws_iam_role_policy_attachment" "config" {
+  role       = aws_iam_role.config.name
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWS_ConfigRole"
+}
 resource "aws_config_configuration_recorder" "this" {
  name = "${var.name}-recorder"
  role_arn = aws_iam_role.config.arn
@@ -60,4 +63,8 @@ resource "aws_config_delivery_channel" "this" {
   s3_bucket_name = aws_s3_bucket.logs.id
   depends_on     = [aws_config_configuration_recorder.this]
 }
-resource "aws_config_configuration_recorder_status" "this" { name=aws_config_configuration_recorder.this.name is_enabled=true depends_on=[aws_config_delivery_channel.this] }
+resource "aws_config_configuration_recorder_status" "this" {
+  name       = aws_config_configuration_recorder.this.name
+  is_enabled = true
+  depends_on = [aws_config_delivery_channel.this]
+}
