@@ -52,10 +52,10 @@ export class TenantScopedLock implements DistributedLockPort{
 
 export class TenantScopedSearch implements SearchPort{
   constructor(private readonly delegate:SearchPort,private readonly ctx:Pick<TenantContext,'tenantId'|'workspaceId'>){}
-  search<T=unknown>(query:Omit<SearchQuery,'tenantId'|'workspaceId'> & Partial<Pick<SearchQuery,'tenantId'|'workspaceId'>>):Promise<SearchResult<T>>{
+  async search<T=unknown>(query:Omit<SearchQuery,'tenantId'|'workspaceId'> & Partial<Pick<SearchQuery,'tenantId'|'workspaceId'>>):Promise<SearchResult<T>>{
     if(query.tenantId&&query.tenantId!==this.ctx.tenantId)throw new Error('CROSS_TENANT_SEARCH_DENIED');
     if(query.workspaceId&&this.ctx.workspaceId&&query.workspaceId!==this.ctx.workspaceId)throw new Error('CROSS_WORKSPACE_SEARCH_DENIED');
-    return this.delegate.search<T>({...query,tenantId:this.ctx.tenantId,workspaceId:this.ctx.workspaceId} as SearchQuery);
+    return await this.delegate.search<T>({...query,tenantId:this.ctx.tenantId,workspaceId:this.ctx.workspaceId} as SearchQuery);
   }
   health(){return this.delegate.health()}
 }
@@ -64,10 +64,10 @@ export class TenantScopedObjectStorage implements ObjectStoragePort{
   private readonly prefix:string;
   constructor(private readonly delegate:ObjectStoragePort,private readonly ctx:Pick<TenantContext,'tenantId'|'workspaceId'>){this.prefix=storagePrefix(ctx)}
   private key(key:string){return `${this.prefix}${relativeStorageKey(key)}`}
-  put(key:string,body:Uint8Array,metadata:Record<string,string>={}){return this.delegate.put(this.key(key),body,{...metadata,tenantId:this.ctx.tenantId,workspaceId:this.ctx.workspaceId??''})}
-  get(key:string){return this.delegate.get(this.key(key))}
-  delete(key:string){return this.delegate.delete(this.key(key))}
-  signedUrl(key:string,expiresSeconds:number){return this.delegate.signedUrl(this.key(key),expiresSeconds)}
+  async put(key:string,body:Uint8Array,metadata:Record<string,string>={}){return await this.delegate.put(this.key(key),body,{...metadata,tenantId:this.ctx.tenantId,workspaceId:this.ctx.workspaceId??''})}
+  async get(key:string){return await this.delegate.get(this.key(key))}
+  async delete(key:string){return await this.delegate.delete(this.key(key))}
+  async signedUrl(key:string,expiresSeconds:number){return await this.delegate.signedUrl(this.key(key),expiresSeconds)}
   health(){return this.delegate.health()}
 }
 
@@ -82,20 +82,20 @@ export class TenantScopedJobQueue implements JobQueuePort{
 
 export class TenantScopedEventBus implements EventBusPort{
   constructor(private readonly delegate:EventBusPort,private readonly ctx:Pick<TenantContext,'tenantId'|'workspaceId'>){}
-  publish(event:DomainEvent){
+  async publish(event:DomainEvent){
     if(event.tenantId!==this.ctx.tenantId)throw new Error('CROSS_TENANT_EVENT_DENIED');
     if(this.ctx.workspaceId&&event.workspaceId!==this.ctx.workspaceId)throw new Error('CROSS_WORKSPACE_EVENT_DENIED');
-    return this.delegate.publish(event);
+    return await this.delegate.publish(event);
   }
   health(){return this.delegate.health()}
 }
 
 export class TenantScopedAI implements AIModelPort{
   constructor(private readonly delegate:AIModelPort,private readonly ctx:Pick<TenantContext,'tenantId'|'workspaceId'>){}
-  generate(request:AIModelRequest):Promise<AIModelResponse>{
+  async generate(request:AIModelRequest):Promise<AIModelResponse>{
     if(request.tenantId&&request.tenantId!==this.ctx.tenantId)throw new Error('CROSS_TENANT_AI_DENIED');
     if(request.workspaceId&&this.ctx.workspaceId&&request.workspaceId!==this.ctx.workspaceId)throw new Error('CROSS_WORKSPACE_AI_DENIED');
-    return this.delegate.generate({...request,tenantId:this.ctx.tenantId,workspaceId:this.ctx.workspaceId});
+    return await this.delegate.generate({...request,tenantId:this.ctx.tenantId,workspaceId:this.ctx.workspaceId});
   }
   health(){return this.delegate.health()}
 }
@@ -103,6 +103,6 @@ export class TenantScopedAI implements AIModelPort{
 export class TenantScopedSecretProvider implements SecretProvider{
   private readonly prefix:string;
   constructor(private readonly delegate:SecretProvider,private readonly ctx:Pick<TenantContext,'tenantId'|'workspaceId'>){this.prefix=tenantCredentialPrefix(ctx)}
-  get(name:string){return this.delegate.get(`${this.prefix}${relativeCredentialName(name)}`)}
+  async get(name:string){return await this.delegate.get(`${this.prefix}${relativeCredentialName(name)}`)}
   health(){return this.delegate.health()}
 }
