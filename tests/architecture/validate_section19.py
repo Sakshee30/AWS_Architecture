@@ -17,5 +17,7 @@ for token in ['listCapabilities','getCapability','listDependencies','listConfigV
  assert token in repo, token
 memory=(R/'apps/platform-control-api/src/section19/memory-repository.ts').read_text()
 assert 'class InMemoryControlPlaneRepository' in memory
-assert 'CONFIG_VERSION_NOT_FOUND' in memory
+postgres=(R/'apps/platform-control-api/src/section19/postgres-repository.ts').read_text()
+for token in ['class PostgresControlPlaneRepository','SqlExecutor','BEGIN','ROLLBACK','audit_event','provider_health']:
+ assert token in postgres, token
 print('Section 19 integration-aware validation passed')
