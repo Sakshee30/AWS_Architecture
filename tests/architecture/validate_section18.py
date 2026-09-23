@@ -15,6 +15,14 @@ for env in ("dev","test","staging","prod"):
     text = (p / "variables.tf").read_text()
     for flag in ("enable_redis","enable_msk","enable_opensearch","enable_eks","enable_gpu_nodes"):
         assert flag in text, f"{env} missing explicit {flag}"
+    desired = ROOT / "infrastructure" / "gitops" / "environments" / env / "desired-state.json"
+    assert desired.exists(), f"Missing GitOps desired state for {env}"
+    state = json.loads(desired.read_text())
+    assert state["environment"] == env
+    assert state["changePolicy"]["sourceOfTruth"] == "git"
+    assert state["changePolicy"]["directAwsMutationFromBrowser"] is False
+    for flag in ("enable_redis","enable_msk","enable_opensearch","enable_eks","enable_gpu_nodes"):
+        assert flag in state["infrastructure"], f"{env} GitOps desired state missing {flag}"
 
 gitops = (ROOT / "infrastructure/gitops/README.md").read_text()
 for gate in ("Terraform plan","approval","health","rollback"):
@@ -29,4 +37,6 @@ platform = (TF / "modules/platform-environment/main.tf").read_text()
 for flag in ("enable_redis","enable_msk","enable_opensearch","enable_eks","enable_gpu_nodes"):
     assert f"var.{flag}" in platform, f"desired state not wired for {flag}"
 
+assert (ROOT / "scripts/validate-gitops-desired-state.py").exists()
+assert (ROOT / ".github/workflows/gitops-drift.yml").exists()
 print("Section 18 static architecture validation passed")

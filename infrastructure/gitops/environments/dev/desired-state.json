@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "environment": "dev",
+  "infrastructure": {
+    "enable_redis": false,
+    "enable_msk": false,
+    "enable_opensearch": false,
+    "enable_eks": false,
+    "enable_ecs": true,
+    "enable_gpu_nodes": false,
+    "enable_alb": true
+  },
+  "changePolicy": {
+    "sourceOfTruth": "git",
+    "directAwsMutationFromBrowser": false,
+    "requireHealthVerification": true,
+    "automaticRollbackOnHealthFailure": true
+  }
+}

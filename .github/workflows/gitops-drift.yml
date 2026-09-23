@@ -1,0 +1,23 @@
+name: GitOps Desired State and Drift Gate
+on:
+  pull_request:
+    paths:
+      - "infrastructure/gitops/**"
+      - "infrastructure/terraform/environments/**"
+      - "scripts/validate-gitops-desired-state.py"
+      - ".github/workflows/gitops-drift.yml"
+  push:
+    branches: [main]
+    paths:
+      - "infrastructure/gitops/**"
+      - "infrastructure/terraform/environments/**"
+      - "scripts/validate-gitops-desired-state.py"
+permissions:
+  contents: read
+jobs:
+  desired-state-consistency:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Git desired state against Terraform inputs
+        run: python scripts/validate-gitops-desired-state.py

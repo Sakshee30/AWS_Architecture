@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "environment": "staging",
+  "infrastructure": {
+    "enable_redis": true,
+    "enable_msk": false,
+    "enable_opensearch": true,
+    "enable_eks": true,
+    "enable_ecs": false,
+    "enable_gpu_nodes": false,
+    "enable_alb": false
+  },
+  "changePolicy": {
+    "sourceOfTruth": "git",
+    "directAwsMutationFromBrowser": false,
+    "requireHealthVerification": true,
+    "automaticRollbackOnHealthFailure": true
+  }
+}
