@@ -12,11 +12,18 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with: {fetch-depth: 0}
-      - uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          args: detect --redact --source=.
+      - name: Install Gitleaks
+        shell: bash
+        run: |
+          set -euo pipefail
+          VERSION=8.24.3
+          curl -fsSL "https://github.com/gitleaks/gitleaks/releases/download/v${VERSION}/gitleaks_${VERSION}_linux_x64.tar.gz" -o /tmp/gitleaks.tgz
+          tar -xzf /tmp/gitleaks.tgz -C /tmp gitleaks
+          /tmp/gitleaks version
+      - name: Secret scan working tree
+        shell: bash
+        run: /tmp/gitleaks detect --no-git --source . --redact --exit-code 1
+
   sast:
     runs-on: ubuntu-latest
     steps:
